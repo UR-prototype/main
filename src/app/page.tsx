@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
-import { AlertOctagon, ArrowRight, ClipboardList, Users } from "lucide-react";
+import { AlertOctagon, ArrowRight, Users } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { StatusBadge } from "@/components/StatusBadge";
+import { UploadButton } from "@/components/UploadButton";
 import {
   analyses,
   getWorker,
@@ -29,11 +32,16 @@ export default function DashboardPage() {
   const attention = [
     ...jobs.filter((j) => j.status === "failed"),
     ...jobs.filter((j) =>
-      ["queued", "preprocessing", "pose_extraction", "analyzing", "scoring"].includes(
-        j.status,
-      ),
+      [
+        "queued",
+        "preprocessing",
+        "pose_extraction",
+        "analyzing",
+        "scoring",
+      ].includes(j.status),
     ),
   ].slice(0, 4);
+  const sampleDone = jobs.find((j) => j.videoId === "V-101" && j.status === "completed");
 
   return (
     <AppShell
@@ -48,22 +56,42 @@ export default function DashboardPage() {
             <Users size={14} />
             기술자
           </Link>
-          <Link
-            href="/work/"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white"
-          >
-            <ClipboardList size={14} />
-            작업·분석
-          </Link>
+          <UploadButton />
         </div>
       }
     >
+      {sampleDone ? (
+        <section className="mb-5 rounded-xl border border-brand/20 bg-brand-soft/50 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-medium text-brand">샘플 완료 건</p>
+              <p className="mt-0.5 text-sm font-semibold text-ink">
+                DO TIEN DUC · V-101 · 78점 (중급)
+              </p>
+              <p className="mt-0.5 text-xs text-muted">
+                분석 종합 → 자세 → 검토 → 평가서 순으로 확인할 수 있습니다.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/analysis/V-101/"
+                className="rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white"
+              >
+                분석 열기
+              </Link>
+              <Link
+                href="/reports/V-101/"
+                className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs"
+              >
+                평가서
+              </Link>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi
-          label="오늘 분석 완료"
-          value={opsSummary.todayCompleted}
-          href="/work/"
-        />
+        <Kpi label="오늘 분석 완료" value={opsSummary.todayCompleted} href="/work/" />
         <Kpi
           label="파이프라인 진행"
           value={inPipeline}
@@ -104,13 +132,18 @@ export default function DashboardPage() {
             </Link>
           </div>
           {attention.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted">대기 중인 이슈가 없습니다.</p>
+            <p className="py-8 text-center text-sm text-muted">
+              대기 중인 이슈가 없습니다.
+            </p>
           ) : (
             <ul className="divide-y divide-line">
               {attention.map((j) => {
                 const w = getWorker(j.workerId);
                 return (
-                  <li key={j.id} className="flex items-center justify-between gap-2 py-3 first:pt-0 last:pb-0">
+                  <li
+                    key={j.id}
+                    className="flex items-center justify-between gap-2 py-3 first:pt-0 last:pb-0"
+                  >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">
                         {w?.name ?? j.workerId}
@@ -150,7 +183,10 @@ export default function DashboardPage() {
         <section className="rounded-xl border border-line bg-surface p-5 lg:col-span-3">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold">최근 작업 영상</h2>
-            <Link href="/work/" className="inline-flex items-center gap-1 text-xs text-brand hover:underline">
+            <Link
+              href="/work/"
+              className="inline-flex items-center gap-1 text-xs text-brand hover:underline"
+            >
               전체
               <ArrowRight size={12} />
             </Link>
@@ -173,12 +209,17 @@ export default function DashboardPage() {
                   return (
                     <tr key={j.id}>
                       <td className="py-2.5">
-                        <Link href={`/workers/${j.workerId}/`} className="font-medium hover:text-brand">
+                        <Link
+                          href={`/workers/${j.workerId}/`}
+                          className="font-medium hover:text-brand"
+                        >
                           {w?.name}
                         </Link>
                         <p className="text-[11px] text-muted">{j.jobType}</p>
                       </td>
-                      <td className="py-2.5 font-mono text-xs text-muted">{j.videoId}</td>
+                      <td className="py-2.5 font-mono text-xs text-muted">
+                        {j.videoId}
+                      </td>
                       <td className="py-2.5">
                         <StatusBadge status={j.status} />
                       </td>
@@ -187,15 +228,24 @@ export default function DashboardPage() {
                       </td>
                       <td className="py-2.5 text-right">
                         {j.status === "completed" ? (
-                          <Link href={`/analysis/${j.videoId}/`} className="text-xs text-brand hover:underline">
+                          <Link
+                            href={`/analysis/${j.videoId}/`}
+                            className="text-xs text-brand hover:underline"
+                          >
                             {score != null ? `${score}점` : "결과"}
                           </Link>
                         ) : j.status === "failed" ? (
-                          <Link href="/work/failed/" className="text-xs text-danger hover:underline">
+                          <Link
+                            href="/work/failed/"
+                            className="text-xs text-danger hover:underline"
+                          >
                             실패
                           </Link>
                         ) : (
-                          <Link href="/work/progress/" className="text-xs text-muted hover:underline">
+                          <Link
+                            href="/work/progress/"
+                            className="text-xs text-muted hover:underline"
+                          >
                             진행
                           </Link>
                         )}
@@ -237,7 +287,9 @@ function Kpi({
       className="rounded-xl border border-line bg-surface p-4 transition hover:border-brand/40 hover:bg-brand-soft/40"
     >
       <p className="text-xs text-muted">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold tabular-nums ${valueClass}`}>{value}</p>
+      <p className={`mt-1 text-2xl font-semibold tabular-nums ${valueClass}`}>
+        {value}
+      </p>
       {hint ? <p className="mt-1 text-[11px] text-muted">{hint}</p> : null}
     </Link>
   );

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
+import { UploadProvider } from "@/components/UploadProvider";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -19,7 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${dmSans.variable} antialiased`}>{children}</body>
+      <body className={`${dmSans.variable} antialiased`}>
+        <UploadProvider>{children}</UploadProvider>
+      </body>
     </html>
   );
 }
