@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
+import { TradeScoreLineChart } from "@/components/DashboardCharts";
 import { SectionTabs, workerTabs } from "@/components/SectionTabs";
 import {
   getAnalysis,
@@ -101,47 +102,32 @@ export default function CompareClient() {
   }, [rows]);
 
   return (
-    <AppShell
-      title="기술자"
-      subtitle="직종 요약 표 + 인력 비교 표"
-    >
+    <AppShell title="기술자" subtitle="직종별 숙련도 추이 · 인력 비교 표">
       <SectionTabs tabs={workerTabs} />
 
-      <section className="mb-5 overflow-hidden rounded-xl border border-line bg-surface">
-        <div className="border-b border-line px-4 py-3">
-          <h2 className="text-sm font-semibold">직종별 요약</h2>
-          <p className="text-xs text-muted">행을 누르면 아래 비교 표가 해당 직종으로 필터됩니다.</p>
+      <section className="mb-5 rounded-xl border border-line bg-surface p-5">
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-sm font-semibold">직종별 숙련도</h2>
+            <p className="text-xs text-muted">
+              평균·최고 점수 꺾은선 · 점을 클릭하면 아래 표가 필터됩니다.
+            </p>
+          </div>
+          {trade !== "전체" ? (
+            <button
+              type="button"
+              onClick={() => setTrade("전체")}
+              className="text-xs text-brand hover:underline"
+            >
+              전체 보기
+            </button>
+          ) : null}
         </div>
-        <table className="w-full text-left text-sm">
-          <thead className="bg-bg text-xs text-muted">
-            <tr>
-              <th className="px-4 py-2.5 font-medium">직종</th>
-              <th className="px-4 py-2.5 font-medium">인원</th>
-              <th className="px-4 py-2.5 font-medium">분석 완료</th>
-              <th className="px-4 py-2.5 font-medium">평균</th>
-              <th className="px-4 py-2.5 font-medium">최고</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tradeSummary.map((row) => (
-              <tr
-                key={row.trade}
-                className={`cursor-pointer border-t border-line hover:bg-brand-soft/50 ${
-                  trade === row.trade ? "bg-brand-soft/40" : ""
-                }`}
-                onClick={() => setTrade(row.trade)}
-              >
-                <td className="px-4 py-2.5 font-medium">{row.trade}</td>
-                <td className="px-4 py-2.5 tabular-nums">{row.count}</td>
-                <td className="px-4 py-2.5 tabular-nums">{row.scored}</td>
-                <td className="px-4 py-2.5 tabular-nums text-brand">
-                  {row.avg ?? "—"}
-                </td>
-                <td className="px-4 py-2.5 tabular-nums">{row.max ?? "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <TradeScoreLineChart
+          data={tradeSummary}
+          activeTrade={trade === "전체" ? undefined : trade}
+          onSelectTrade={(t) => setTrade(t as JobType)}
+        />
       </section>
 
       <div className="mb-3 flex flex-wrap items-end justify-between gap-3">

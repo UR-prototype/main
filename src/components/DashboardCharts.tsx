@@ -87,6 +87,71 @@ export function AiManualCompareChart({
   );
 }
 
+export function TradeScoreLineChart({
+  data,
+  onSelectTrade,
+}: {
+  data: { trade: string; avg: number | null; max: number | null; count: number }[];
+  activeTrade?: string;
+  onSelectTrade?: (trade: string) => void;
+}) {
+  const chartData = data.map((d) => ({
+    ...d,
+    avg: d.avg ?? 0,
+    max: d.max ?? 0,
+  }));
+
+  return (
+    <div className="h-64 w-full">
+      <ResponsiveContainer>
+        <LineChart
+          data={chartData}
+          margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
+          onClick={(state) => {
+            const label = state?.activeLabel;
+            if (typeof label === "string" && onSelectTrade) onSelectTrade(label);
+          }}
+          style={{ cursor: onSelectTrade ? "pointer" : undefined }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+          <XAxis dataKey="trade" tick={{ fontSize: 11 }} />
+          <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
+          <Tooltip
+            formatter={(value, name) => [
+              !value ? "—" : String(value),
+              name === "avg" ? "평균" : name === "max" ? "최고" : String(name),
+            ]}
+            labelFormatter={(label) => `직종 · ${label}`}
+          />
+          <Legend
+            formatter={(value) =>
+              value === "avg" ? "평균 숙련도" : "최고 숙련도"
+            }
+          />
+          <Line
+            type="monotone"
+            dataKey="avg"
+            name="avg"
+            stroke="#1f6feb"
+            strokeWidth={2.5}
+            dot={{ r: 5, fill: "#1f6feb", strokeWidth: 0 }}
+            activeDot={{ r: 7 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="max"
+            name="max"
+            stroke="#94a3b8"
+            strokeWidth={2}
+            strokeDasharray="4 4"
+            dot={{ r: 3, fill: "#94a3b8", strokeWidth: 0 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 export function SkillRadar({
   metrics,
 }: {
