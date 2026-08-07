@@ -886,7 +886,12 @@ export const analyses: Record<string, AnalysisResult> = {
   },
 };
 
-export const jobTypes = [
+export const jobTypes: {
+  id: JobType;
+  supported: boolean | "demo";
+  note: string;
+  features: string[];
+}[] = [
   {
     id: "금형조립",
     supported: true,
@@ -895,7 +900,7 @@ export const jobTypes = [
   },
   {
     id: "기계가공",
-    supported: "demo" as const,
+    supported: "demo",
     note: "시범 적용",
     features: ["work_speed", "stability"],
   },
@@ -906,16 +911,16 @@ export const jobTypes = [
     features: [],
   },
   {
-    id: "CNC",
-    supported: false,
-    note: "가공 경로·사이클 지표 확장 예정",
-    features: [],
+    id: "프레스",
+    supported: "demo",
+    note: "시범 데이터로 진행 상태 확인 가능",
+    features: ["work_speed", "cycle_count"],
   },
   {
-    id: "검사/포장",
-    supported: false,
-    note: "검사 포인트 체류 지표 확장 예정",
-    features: [],
+    id: "사출",
+    supported: "demo",
+    note: "시범 적용 · 실패 건 재처리 시나리오 포함",
+    features: ["idle_time", "cycle_count"],
   },
 ];
 

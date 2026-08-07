@@ -8,31 +8,73 @@ import { SectionTabs, workerTabs } from "@/components/SectionTabs";
 import {
   getAnalysis,
   getJobsByWorker,
-  jobTypes,
   workers,
   type JobType,
 } from "@/data/mock";
 
-const trades = jobTypes.map((j) => j.id as JobType);
+/** 실제 기술자 skill 기준 — jobTypes의 CNC/검사 등 빈 직종 제외 */
+const TRADE_OPTIONS: Array<JobType | "전체"> = [
+  "전체",
+  "금형조립",
+  "기계가공",
+  "용접",
+  "프레스",
+  "사출",
+];
 
 export default function CompareClient() {
   const params = useSearchParams();
-  const initial = (params.get("trade") as JobType | null) ?? "금형조립";
-  const [trade, setTrade] = useState<JobType>(
-    trades.includes(initial) ? initial : "금형조립",
-  );
+  const q = params.get("trade");
+  const initial: JobType | "전체" =
+    q && TRADE_OPTIONS.includes(q as JobType | "전체")
+      ? (q as JobType | "전체")
+      : "전체";
+  const [trade, setTrade] = useState<JobType | "전체">(initial);
+
+  const tradeSummary = useMemo(() => {
+    return (TRADE_OPTIONS.filter((t) => t !== "전체") as JobType[]).map(
+      (t) => {
+        const list = workers.filter((w) => w.skill === t);
+        const scored = list.filter((w) => w.latestScore != null);
+        const avg =
+          scored.length > 0
+            ? Math.round(
+                scored.reduce((s, w) => s + (w.latestScore ?? 0), 0) /
+                  scored.length,
+              )
+            : null;
+        return {
+          trade: t,
+          count: list.length,
+          scored: scored.length,
+          avg,
+          max:
+            scored.length > 0
+              ? Math.max(...scored.map((w) => w.latestScore ?? 0))
+              : null,
+        };
+      },
+    );
+  }, []);
 
   const rows = useMemo(() => {
-    return workers
-      .filter((w) => w.skill === trade)
+    const list =
+      trade === "전체" ? workers : workers.filter((w) => w.skill === trade);
+    return list
       .map((w) => {
-        const latestJob = [...getJobsByWorker(w.id)]
+        const latestJob = [...getJobsByWorker(w.id)].sort((a, b) =>
+          b.workDate.localeCompare(a.workDate),
+        )[0];
+        const completed = [...getJobsByWorker(w.id)]
           .filter((j) => j.status === "completed")
           .sort((a, b) => b.workDate.localeCompare(a.workDate))[0];
-        const analysis = latestJob ? getAnalysis(latestJob.videoId) : null;
+        const analysis = completed
+          ? getAnalysis(completed.videoId)
+          : null;
         return {
           worker: w,
-          videoId: latestJob?.videoId ?? null,
+          videoId: completed?.videoId ?? latestJob?.videoId ?? null,
+          jobStatus: latestJob?.status ?? w.analysisStatus,
           metrics: analysis?.metrics ?? null,
           confidence: analysis?.confidence.aiConfidence ?? null,
         };
@@ -46,26 +88,71 @@ export default function CompareClient() {
     const scored = rows.filter((r) => r.worker.latestScore != null);
     if (!scored.length) return null;
     const avg = Math.round(
-      scored.reduce((s, r) => s + (r.worker.latestScore ?? 0), 0) / scored.length,
+      scored.reduce((s, r) => s + (r.worker.latestScore ?? 0), 0) /
+        scored.length,
     );
-    const max = Math.max(...scored.map((r) => r.worker.latestScore ?? 0));
-    const min = Math.min(...scored.map((r) => r.worker.latestScore ?? 0));
-    return { count: scored.length, avg, max, min };
+    return {
+      count: rows.length,
+      scored: scored.length,
+      avg,
+      max: Math.max(...scored.map((r) => r.worker.latestScore ?? 0)),
+      min: Math.min(...scored.map((r) => r.worker.latestScore ?? 0)),
+    };
   }, [rows]);
 
   return (
-    <AppShell title="기술자" subtitle="직종 단위 표 비교 — 카드 나열 대신 한 표로 확인">
+    <AppShell
+      title="기술자"
+      subtitle="직종 요약 표 + 인력 비교 표"
+    >
       <SectionTabs tabs={workerTabs} />
 
-      <div className="mb-4 flex flex-wrap items-end gap-3">
+      <section className="mb-5 overflow-hidden rounded-xl border border-line bg-surface">
+        <div className="border-b border-line px-4 py-3">
+          <h2 className="text-sm font-semibold">직종별 요약</h2>
+          <p className="text-xs text-muted">행을 누르면 아래 비교 표가 해당 직종으로 필터됩니다.</p>
+        </div>
+        <table className="w-full text-left text-sm">
+          <thead className="bg-bg text-xs text-muted">
+            <tr>
+              <th className="px-4 py-2.5 font-medium">직종</th>
+              <th className="px-4 py-2.5 font-medium">인원</th>
+              <th className="px-4 py-2.5 font-medium">분석 완료</th>
+              <th className="px-4 py-2.5 font-medium">평균</th>
+              <th className="px-4 py-2.5 font-medium">최고</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tradeSummary.map((row) => (
+              <tr
+                key={row.trade}
+                className={`cursor-pointer border-t border-line hover:bg-brand-soft/50 ${
+                  trade === row.trade ? "bg-brand-soft/40" : ""
+                }`}
+                onClick={() => setTrade(row.trade)}
+              >
+                <td className="px-4 py-2.5 font-medium">{row.trade}</td>
+                <td className="px-4 py-2.5 tabular-nums">{row.count}</td>
+                <td className="px-4 py-2.5 tabular-nums">{row.scored}</td>
+                <td className="px-4 py-2.5 tabular-nums text-brand">
+                  {row.avg ?? "—"}
+                </td>
+                <td className="px-4 py-2.5 tabular-nums">{row.max ?? "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
         <label className="text-sm">
-          <span className="mb-1 block text-xs text-muted">직종</span>
+          <span className="mb-1 block text-xs text-muted">비교 대상</span>
           <select
             value={trade}
-            onChange={(e) => setTrade(e.target.value as JobType)}
+            onChange={(e) => setTrade(e.target.value as JobType | "전체")}
             className="rounded-lg border border-line bg-surface px-3 py-2 text-sm"
           >
-            {trades.map((t) => (
+            {TRADE_OPTIONS.map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>
@@ -75,7 +162,10 @@ export default function CompareClient() {
         {summary ? (
           <div className="flex flex-wrap gap-4 rounded-lg border border-line bg-surface px-4 py-2 text-sm">
             <span>
-              분석 인력 <b>{summary.count}</b>
+              인원 <b>{summary.count}</b>
+            </span>
+            <span>
+              분석 <b>{summary.scored}</b>
             </span>
             <span>
               평균 <b className="text-brand">{summary.avg}</b>
@@ -87,9 +177,7 @@ export default function CompareClient() {
               최저 <b>{summary.min}</b>
             </span>
           </div>
-        ) : (
-          <p className="text-sm text-muted">이 직종에 분석 완료 인력이 없습니다.</p>
-        )}
+        ) : null}
       </div>
 
       <div className="overflow-hidden rounded-xl border border-line bg-surface">
@@ -98,6 +186,7 @@ export default function CompareClient() {
             <tr>
               <th className="px-4 py-3 font-medium">#</th>
               <th className="px-4 py-3 font-medium">기술자</th>
+              <th className="px-4 py-3 font-medium">직종</th>
               <th className="px-4 py-3 font-medium">숙련도</th>
               <th className="px-4 py-3 font-medium">등급</th>
               <th className="px-4 py-3 font-medium">속도</th>
@@ -111,7 +200,7 @@ export default function CompareClient() {
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={10} className="px-4 py-10 text-center text-muted">
+                <td colSpan={11} className="px-4 py-10 text-center text-muted">
                   해당 직종 기술자가 없습니다.
                 </td>
               </tr>
@@ -126,26 +215,46 @@ export default function CompareClient() {
                     >
                       {r.worker.name}
                     </Link>
-                    <p className="font-mono text-[11px] text-muted">{r.worker.id}</p>
+                    <p className="font-mono text-[11px] text-muted">
+                      {r.worker.id}
+                    </p>
                   </td>
+                  <td className="px-4 py-3">{r.worker.skill}</td>
                   <td className="px-4 py-3 font-semibold text-brand tabular-nums">
                     {r.worker.latestScore ?? "—"}
                   </td>
-                  <td className="px-4 py-3 text-muted">{r.worker.latestLevel ?? "—"}</td>
-                  <td className="px-4 py-3 tabular-nums">{r.metrics?.speed ?? "—"}</td>
-                  <td className="px-4 py-3 tabular-nums">{r.metrics?.stability ?? "—"}</td>
-                  <td className="px-4 py-3 tabular-nums">{r.metrics?.repetition ?? "—"}</td>
-                  <td className="px-4 py-3 tabular-nums">{r.metrics?.accuracy ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted">
+                    {r.worker.latestLevel ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 tabular-nums">
+                    {r.metrics?.speed ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 tabular-nums">
+                    {r.metrics?.stability ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 tabular-nums">
+                    {r.metrics?.repetition ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 tabular-nums">
+                    {r.metrics?.accuracy ?? "—"}
+                  </td>
                   <td className="px-4 py-3 tabular-nums text-muted">
                     {r.confidence != null ? `${r.confidence}%` : "—"}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    {r.videoId ? (
+                    {r.videoId && r.metrics ? (
                       <Link
                         href={`/analysis/${r.videoId}/`}
                         className="text-xs text-brand hover:underline"
                       >
                         분석
+                      </Link>
+                    ) : r.videoId ? (
+                      <Link
+                        href="/work/progress/"
+                        className="text-xs text-muted hover:underline"
+                      >
+                        진행
                       </Link>
                     ) : (
                       <span className="text-xs text-muted">—</span>

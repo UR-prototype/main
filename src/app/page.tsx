@@ -1,12 +1,15 @@
-"use client";
-
 import Link from "next/link";
 import { AlertOctagon, ArrowRight, Users } from "lucide-react";
+import {
+  AiManualCompareChart,
+  LevelBarChart,
+} from "@/components/DashboardCharts";
 import { AppShell } from "@/components/AppShell";
 import { StatusBadge } from "@/components/StatusBadge";
 import { UploadButton } from "@/components/UploadButton";
 import {
   analyses,
+  dashboardStats,
   getWorker,
   jobs,
   opsSummary,
@@ -41,7 +44,6 @@ export default function DashboardPage() {
       ].includes(j.status),
     ),
   ].slice(0, 4);
-  const sampleDone = jobs.find((j) => j.videoId === "V-101" && j.status === "completed");
 
   return (
     <AppShell
@@ -60,35 +62,33 @@ export default function DashboardPage() {
         </div>
       }
     >
-      {sampleDone ? (
-        <section className="mb-5 rounded-xl border border-brand/20 bg-brand-soft/50 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-medium text-brand">샘플 완료 건</p>
-              <p className="mt-0.5 text-sm font-semibold text-ink">
-                DO TIEN DUC · V-101 · 78점 (중급)
-              </p>
-              <p className="mt-0.5 text-xs text-muted">
-                분석 종합 → 자세 → 검토 → 평가서 순으로 확인할 수 있습니다.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/analysis/V-101/"
-                className="rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white"
-              >
-                분석 열기
-              </Link>
-              <Link
-                href="/reports/V-101/"
-                className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs"
-              >
-                평가서
-              </Link>
-            </div>
+      <section className="mb-5 rounded-xl border border-brand/20 bg-brand-soft/50 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-medium text-brand">샘플 완료 건</p>
+            <p className="mt-0.5 text-sm font-semibold text-ink">
+              DO TIEN DUC · V-101 · 78점 (중급)
+            </p>
+            <p className="mt-0.5 text-xs text-muted">
+              분석 종합 → 자세 → 검토 → 평가서 순으로 확인할 수 있습니다.
+            </p>
           </div>
-        </section>
-      ) : null}
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/analysis/V-101/"
+              className="rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white"
+            >
+              분석 열기
+            </Link>
+            <Link
+              href="/reports/V-101/"
+              className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs"
+            >
+              평가서
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi label="오늘 분석 완료" value={opsSummary.todayCompleted} href="/work/" />
@@ -122,6 +122,17 @@ export default function DashboardPage() {
         />
         <Kpi label="등록 기술자" value={workers.length} href="/workers/" />
       </section>
+
+      <div className="mt-6 grid gap-5 lg:grid-cols-2">
+        <section className="rounded-xl border border-line bg-surface p-5">
+          <h2 className="mb-3 text-sm font-semibold">숙련도 등급 분포</h2>
+          <LevelBarChart data={dashboardStats.levelDist} />
+        </section>
+        <section className="rounded-xl border border-line bg-surface p-5">
+          <h2 className="mb-3 text-sm font-semibold">시스템 vs 평가자 점수</h2>
+          <AiManualCompareChart data={dashboardStats.scoreTrend} />
+        </section>
+      </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-5">
         <section className="rounded-xl border border-line bg-surface p-5 lg:col-span-2">
@@ -158,9 +169,7 @@ export default function DashboardPage() {
                         href={
                           j.status === "failed"
                             ? "/work/failed/"
-                            : j.status === "completed"
-                              ? `/analysis/${j.videoId}/`
-                              : "/work/progress/"
+                            : `/analysis/${j.videoId}/`
                         }
                         className="text-xs text-brand hover:underline"
                       >
@@ -175,13 +184,13 @@ export default function DashboardPage() {
           {failed > 0 ? (
             <p className="mt-3 flex items-start gap-2 rounded-md bg-red-50 px-3 py-2 text-xs text-danger">
               <AlertOctagon size={14} className="mt-0.5 shrink-0" />
-              실패 {failed}건은 작업·분석 → 실패 탭에서 재실행·담당 배정합니다.
+              실패 {failed}건은 작업·분석 → 실패 탭에서 재실행합니다.
             </p>
           ) : null}
         </section>
 
-        <section className="rounded-xl border border-line bg-surface p-5 lg:col-span-3">
-          <div className="mb-3 flex items-center justify-between">
+        <section className="overflow-hidden rounded-xl border border-line bg-surface lg:col-span-3">
+          <div className="flex items-center justify-between border-b border-line px-5 py-3">
             <h2 className="text-sm font-semibold">최근 작업 영상</h2>
             <Link
               href="/work/"
@@ -193,22 +202,22 @@ export default function DashboardPage() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="text-xs text-muted">
+              <thead className="bg-bg text-xs text-muted">
                 <tr>
-                  <th className="pb-2 font-medium">기술자</th>
-                  <th className="pb-2 font-medium">영상</th>
-                  <th className="pb-2 font-medium">상태</th>
-                  <th className="pb-2 font-medium">길이</th>
-                  <th className="pb-2 font-medium" />
+                  <th className="px-4 py-2.5 font-medium">기술자</th>
+                  <th className="px-4 py-2.5 font-medium">영상</th>
+                  <th className="px-4 py-2.5 font-medium">상태</th>
+                  <th className="px-4 py-2.5 font-medium">길이</th>
+                  <th className="px-4 py-2.5 font-medium">결과</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody>
                 {recent.map((j) => {
                   const w = getWorker(j.workerId);
                   const score = j.skillScore ?? analyses[j.videoId]?.skillScore;
                   return (
-                    <tr key={j.id}>
-                      <td className="py-2.5">
+                    <tr key={j.id} className="border-t border-line">
+                      <td className="px-4 py-2.5">
                         <Link
                           href={`/workers/${j.workerId}/`}
                           className="font-medium hover:text-brand"
@@ -217,20 +226,20 @@ export default function DashboardPage() {
                         </Link>
                         <p className="text-[11px] text-muted">{j.jobType}</p>
                       </td>
-                      <td className="py-2.5 font-mono text-xs text-muted">
+                      <td className="px-4 py-2.5 font-mono text-xs text-muted">
                         {j.videoId}
                       </td>
-                      <td className="py-2.5">
+                      <td className="px-4 py-2.5">
                         <StatusBadge status={j.status} />
                       </td>
-                      <td className="py-2.5 text-xs text-muted">
+                      <td className="px-4 py-2.5 text-xs text-muted">
                         {formatDuration(j.durationSec)}
                       </td>
-                      <td className="py-2.5 text-right">
+                      <td className="px-4 py-2.5">
                         {j.status === "completed" ? (
                           <Link
                             href={`/analysis/${j.videoId}/`}
-                            className="text-xs text-brand hover:underline"
+                            className="text-xs font-medium text-brand hover:underline"
                           >
                             {score != null ? `${score}점` : "결과"}
                           </Link>
