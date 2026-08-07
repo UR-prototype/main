@@ -4,16 +4,25 @@ import { AnalysisTabs } from "@/components/AnalysisTabs";
 import { AppShell } from "@/components/AppShell";
 import { EvidenceGallery } from "@/components/EvidenceGallery";
 import { ExplainCard } from "@/components/ExplainCard";
+import { FrameRail } from "@/components/FrameRail";
 import { MatchingCard } from "@/components/MatchingCard";
 import { PipelineProgress } from "@/components/PipelineProgress";
 import { ProductJudgmentPanel } from "@/components/ProductJudgmentPanel";
 import { ScoreBreakdown } from "@/components/ScoreBreakdown";
 import { StatusBadge } from "@/components/StatusBadge";
+import { StudioMetaBar } from "@/components/StudioMetaBar";
 import { TimelineScrubber } from "@/components/TimelineScrubber";
 import { getAnalysis, getJob, getWorker, jobs } from "@/data/mock";
 
 export function generateStaticParams() {
   return jobs.map((j) => ({ id: j.videoId }));
+}
+
+function reviewStage(status: string | undefined) {
+  if (status === "승인") return "최종 확정";
+  if (status === "검토중" || status === "미검토") return "검수";
+  if (status === "반려") return "재작업";
+  return "분석";
 }
 
 export default async function AnalysisOverviewPage({
@@ -26,6 +35,10 @@ export default async function AnalysisOverviewPage({
   if (!job) notFound();
   const analysis = getAnalysis(id);
   const worker = getWorker(job.workerId);
+  const stage =
+    job.status === "completed"
+      ? reviewStage(analysis?.reviewStatus)
+      : "분석 파이프라인";
 
   return (
     <AppShell
@@ -49,6 +62,15 @@ export default async function AnalysisOverviewPage({
       }
     >
       <AnalysisTabs videoId={id} />
+
+      <StudioMetaBar
+        stage={stage}
+        pipelineStatus={job.status}
+        reviewStatus={analysis?.reviewStatus}
+        assignee={job.assignee}
+        fps={job.fps}
+        frames={analysis?.framesExtracted}
+      />
 
       {job.status !== "completed" ? (
         <section className="mb-5 rounded-xl border border-line bg-surface p-4">
@@ -78,8 +100,12 @@ export default async function AnalysisOverviewPage({
           <ExplainCard result={analysis} />
 
           <div className="grid gap-5 xl:grid-cols-5">
-            <div className="xl:col-span-3">
+            <div className="space-y-5 xl:col-span-3">
               <TimelineScrubber result={analysis} />
+              <FrameRail
+                frames={analysis.evidenceFrames}
+                title="근거 프레임 스트립"
+              />
             </div>
             <div className="space-y-5 xl:col-span-2">
               <section className="rounded-xl border border-line bg-surface p-5">

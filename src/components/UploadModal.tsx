@@ -24,12 +24,14 @@ export function UploadModal({
   const [jobType, setJobType] = useState<JobType>("금형조립");
   const [fileName, setFileName] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  const [fps, setFps] = useState(5);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setFileName(null);
       setNote("");
+      setFps(5);
       setDone(false);
       return;
     }
@@ -92,7 +94,7 @@ export function UploadModal({
               {worker?.name} · {jobType}
               {fileName ? ` · ${fileName}` : ""}
               <br />
-              작업·분석 → 진행·검토 탭에서 상태를 확인할 수 있습니다.
+              샘플링 {fps} fps · 작업·분석 → 진행·검토 탭에서 상태를 확인할 수 있습니다.
             </p>
             <button
               type="button"
@@ -164,6 +166,27 @@ export function UploadModal({
                 />
               </label>
             </div>
+
+            <label className="block text-sm">
+              <span className="mb-1 block text-xs text-muted">
+                분석 샘플링 FPS{" "}
+                <span className="text-muted/70">(SSLO 프레임 추출 옵션)</span>
+              </span>
+              <select
+                value={fps}
+                onChange={(e) => setFps(Number(e.target.value))}
+                className="w-full rounded-lg border border-line bg-bg px-3 py-2"
+              >
+                {[1, 2, 5, 10, 15, 30].map((n) => (
+                  <option key={n} value={n}>
+                    {n} fps
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-[11px] text-muted">
+                낮을수록 처리 부담↓ · 자세 근거는 핵심 구간 프레임으로 추출합니다.
+              </p>
+            </label>
 
             <label className="block text-sm">
               <span className="mb-1 block text-xs text-muted">메모 (선택)</span>
