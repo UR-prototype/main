@@ -15,13 +15,14 @@ const nav = [
     href: "/work/",
     label: "작업·분석",
     icon: Clapperboard,
-    match: (p: string) => p.startsWith("/work"),
+    // `/workers`가 `/work`로 시작하므로 startsWith("/work") 단독 사용 금지
+    match: (p: string) => p === "/work" || p.startsWith("/work/"),
   },
   {
     href: "/workers/",
     label: "기술자",
     icon: Users,
-    match: (p: string) => p.startsWith("/workers"),
+    match: (p: string) => p === "/workers" || p.startsWith("/workers/"),
   },
 ];
 

@@ -66,13 +66,8 @@ export const workerTabs: SectionTab[] = [
     match: (p) => p === "/workers",
   },
   {
-    href: "/workers/trades/",
-    label: "직종",
-    match: (p) => p === "/workers/trades",
-  },
-  {
     href: "/workers/compare/",
     label: "비교",
-    match: (p) => p === "/workers/compare",
+    match: (p) => p === "/workers/compare" || p === "/workers/trades",
   },
 ];

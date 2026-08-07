@@ -68,10 +68,10 @@ export default async function WorkerDetailPage({
               같은 직종 비교
             </Link>
             <Link
-              href="/workers/trades/"
+              href="/workers/compare/"
               className="text-xs text-brand hover:underline"
             >
-              직종 현황
+              직종·비교
             </Link>
           </div>
         </section>
