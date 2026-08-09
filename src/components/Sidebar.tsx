@@ -3,19 +3,50 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  ClipboardCheck,
   Clapperboard,
+  FolderInput,
   LayoutDashboard,
   LogOut,
+  Tags,
   Users,
 } from "lucide-react";
 
+function normalize(path: string) {
+  if (!path) return "/";
+  if (path.length > 1 && path.endsWith("/")) return path.slice(0, -1);
+  return path;
+}
+
 const nav = [
-  { href: "/", label: "대시보드", icon: LayoutDashboard, match: (p: string) => p === "/" },
+  {
+    href: "/",
+    label: "대시보드",
+    icon: LayoutDashboard,
+    match: (p: string) => p === "/",
+  },
+  {
+    href: "/register/",
+    label: "등록",
+    icon: FolderInput,
+    match: (p: string) => p === "/register" || p.startsWith("/register/"),
+  },
+  {
+    href: "/labeling/",
+    label: "라벨링",
+    icon: Tags,
+    match: (p: string) => p === "/labeling" || p.startsWith("/labeling/"),
+  },
+  {
+    href: "/evaluation/",
+    label: "숙련도 평가",
+    icon: ClipboardCheck,
+    match: (p: string) => p === "/evaluation" || p.startsWith("/evaluation/"),
+  },
   {
     href: "/work/",
-    label: "작업·분석",
+    label: "작업 현황",
     icon: Clapperboard,
-    // `/workers`가 `/work`로 시작하므로 startsWith("/work") 단독 사용 금지
     match: (p: string) => p === "/work" || p.startsWith("/work/"),
   },
   {
@@ -25,12 +56,6 @@ const nav = [
     match: (p: string) => p === "/workers" || p.startsWith("/workers/"),
   },
 ];
-
-function normalize(path: string) {
-  if (!path) return "/";
-  if (path.length > 1 && path.endsWith("/")) return path.slice(0, -1);
-  return path;
-}
 
 export function Sidebar() {
   const pathname = normalize(usePathname());
@@ -47,7 +72,7 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 space-y-0.5 px-2.5 py-3">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-3">
         {nav.map((item) => {
           const active = item.match(pathname);
           const Icon = item.icon;

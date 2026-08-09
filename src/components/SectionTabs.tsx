@@ -59,6 +59,32 @@ export const workTabs: SectionTab[] = [
   },
 ];
 
+export const registerTabs: SectionTab[] = [
+  {
+    href: "/register/",
+    label: "영상·정보",
+    match: (p) => p === "/register",
+  },
+  {
+    href: "/register/product/",
+    label: "조형물 이미지",
+    match: (p) => p === "/register/product",
+  },
+];
+
+export const labelingTabs: SectionTab[] = [
+  {
+    href: "/labeling/",
+    label: "타임라인",
+    match: (p) => p === "/labeling",
+  },
+  {
+    href: "/labeling/product/",
+    label: "조형물 좌표",
+    match: (p) => p === "/labeling/product",
+  },
+];
+
 export const workerTabs: SectionTab[] = [
   {
     href: "/workers/",

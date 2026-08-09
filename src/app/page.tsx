@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { AlertOctagon, ArrowRight, Users } from "lucide-react";
+import { AlertOctagon, ArrowRight } from "lucide-react";
 import {
   AiManualCompareChart,
   LevelBarChart,
 } from "@/components/DashboardCharts";
 import { AppShell } from "@/components/AppShell";
 import { StatusBadge } from "@/components/StatusBadge";
-import { UploadButton } from "@/components/UploadButton";
 import {
   analyses,
   dashboardStats,
@@ -48,43 +47,53 @@ export default function DashboardPage() {
   return (
     <AppShell
       title="대시보드"
-      subtitle="오늘 처리할 분석·검토와 운영 지표"
+      subtitle="등록 · 라벨링 · NCS 평가 · 운영 지표"
       actions={
         <div className="flex gap-2">
           <Link
-            href="/workers/"
+            href="/register/"
             className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm"
           >
-            <Users size={14} />
-            기술자
+            등록
           </Link>
-          <UploadButton />
+          <Link
+            href="/labeling/"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm"
+          >
+            라벨링
+          </Link>
+          <Link
+            href="/evaluation/"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white"
+          >
+            숙련도 평가
+          </Link>
         </div>
       }
     >
       <section className="mb-5 rounded-xl border border-brand/20 bg-brand-soft/50 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-medium text-brand">샘플 완료 건</p>
+            <p className="text-xs font-medium text-brand">업무 흐름</p>
             <p className="mt-0.5 text-sm font-semibold text-ink">
-              DO TIEN DUC · V-101 · 78점 (중급)
+              등록 → 내부 라벨링 → NCS·전문가 숙련도 평가
             </p>
             <p className="mt-0.5 text-xs text-muted">
-              분석 종합 → 자세 → 검토 → 평가서 순으로 확인할 수 있습니다.
+              객체·포즈는 외부 인수 · 타임라인·조형물은 내부 · 숙련도는 NCS 기준
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link
-              href="/analysis/V-101/"
+              href="/labeling/"
               className="rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-white"
             >
-              분석 열기
+              타임라인 라벨
             </Link>
             <Link
-              href="/reports/V-101/"
+              href="/evaluation/V-101/"
               className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs"
             >
-              평가서
+              NCS 평가 예시
             </Link>
           </div>
         </div>

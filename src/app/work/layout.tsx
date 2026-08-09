@@ -9,8 +9,8 @@ export default function WorkLayout({
 }) {
   return (
     <AppShell
-      title="작업·분석"
-      subtitle="영상 등록 · 분석 진행 · 실패 재처리"
+      title="작업 현황"
+      subtitle="영상 목록 · 진행·검토 · 실패 재처리"
       actions={<UploadButton />}
     >
       <SectionTabs tabs={workTabs} />
