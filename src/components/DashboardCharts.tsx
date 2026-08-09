@@ -47,18 +47,20 @@ export function ScoreTrendChart({
 
 export function LevelBarChart({
   data,
+  compact = false,
 }: {
   data: { name: string; value: number }[];
+  compact?: boolean;
 }) {
   return (
-    <div className="h-64 w-full">
+    <div className={`w-full ${compact ? "h-40" : "h-64"}`}>
       <ResponsiveContainer>
-        <BarChart data={data}>
+        <BarChart data={data} margin={{ top: 4, right: 8, left: -8, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-          <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-          <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+          <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+          <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={28} />
           <Tooltip />
-          <Bar dataKey="value" name="인원" fill="#1f6feb" radius={[6, 6, 0, 0]} />
+          <Bar dataKey="value" name="인원" fill="#1f6feb" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -67,20 +69,22 @@ export function LevelBarChart({
 
 export function AiManualCompareChart({
   data,
+  compact = false,
 }: {
   data: { name: string; score: number; manual: number }[];
+  compact?: boolean;
 }) {
   return (
-    <div className="h-64 w-full">
+    <div className={`w-full ${compact ? "h-40" : "h-64"}`}>
       <ResponsiveContainer>
-        <BarChart data={data}>
+        <BarChart data={data} margin={{ top: 4, right: 8, left: -8, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-          <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-          <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
+          <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+          <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} width={28} />
           <Tooltip />
-          <Legend />
-          <Bar dataKey="score" name="시스템 점수" fill="#1f6feb" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="manual" name="평가자 점수" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+          <Legend wrapperStyle={{ fontSize: 11 }} />
+          <Bar dataKey="score" name="시스템" fill="#1f6feb" radius={[3, 3, 0, 0]} />
+          <Bar dataKey="manual" name="평가자" fill="#94a3b8" radius={[3, 3, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

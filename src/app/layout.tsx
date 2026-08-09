@@ -12,7 +12,11 @@ export const metadata: Metadata = {
   title: "UR Connection Console",
   description: "작업 영상 기반 숙련도 평가 · 검토 콘솔",
   icons: {
-    icon: [{ url: "/favicon.png", type: "image/png" }],
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.png", type: "image/png", sizes: "32x32" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
 };
 

@@ -29,7 +29,7 @@ export function AppShell({
             <div className="flex shrink-0 items-center gap-2">{actions}</div>
           ) : null}
         </header>
-        <main className="flex-1 overflow-y-auto px-6 py-5 print:overflow-visible">
+        <main className="flex-1 overflow-y-auto px-5 py-4 print:overflow-visible">
           {children}
         </main>
       </div>
