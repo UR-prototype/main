@@ -44,12 +44,12 @@ export function SectionTabs({ tabs }: { tabs: SectionTab[] }) {
 export const workTabs: SectionTab[] = [
   {
     href: "/work/",
-    label: "전체 영상",
+    label: "전체 세션",
     match: (p) => p === "/work",
   },
   {
     href: "/work/progress/",
-    label: "진행·검토",
+    label: "진행·NCS 검토",
     match: (p) => p === "/work/progress",
   },
   {

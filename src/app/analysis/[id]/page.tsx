@@ -13,7 +13,7 @@ import { ScoreBreakdown } from "@/components/ScoreBreakdown";
 import { StatusBadge } from "@/components/StatusBadge";
 import { StudioMetaBar } from "@/components/StudioMetaBar";
 import { TimelineScrubber } from "@/components/TimelineScrubber";
-import { getAnalysis, getJob, getWorker, jobs } from "@/data/mock";
+import { getAnalysis, getJob, getSession, getWorker, jobs } from "@/data/mock";
 import { NCS_MOLD_ASSY, SCENARIO_MOLD, stageMeta } from "@/data/ncs";
 
 export function generateStaticParams() {
@@ -37,17 +37,34 @@ export default async function AnalysisOverviewPage({
   if (!job) notFound();
   const analysis = getAnalysis(id);
   const worker = getWorker(job.workerId);
+  const session = job.sessionId ? getSession(job.sessionId) : undefined;
   const stage =
     job.status === "completed"
       ? reviewStage(analysis?.reviewStatus)
       : "분석 파이프라인";
+  const reportHref = session
+    ? `/reports/${session.id}/`
+    : `/workers/${job.workerId}/`;
+  const evalHref = session
+    ? `/evaluation/${session.id}/`
+    : "/evaluation/";
 
   return (
     <AppShell
       title="분석 결과"
-      subtitle={`${worker?.name ?? job.workerId} · ${job.videoId} · ${job.jobType}`}
+      subtitle={`${worker?.name ?? job.workerId} · ${job.videoId} · ${job.jobType}${
+        session ? ` · ${session.regNo}` : ""
+      }`}
       actions={
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          {session ? (
+            <Link
+              href={evalHref}
+              className="rounded-lg border border-line px-3 py-2 text-sm"
+            >
+              세션 NCS
+            </Link>
+          ) : null}
           <Link
             href={`/workers/${job.workerId}/`}
             className="rounded-lg border border-line px-3 py-2 text-sm"
@@ -55,10 +72,10 @@ export default async function AnalysisOverviewPage({
             기술자
           </Link>
           <Link
-            href={`/reports/${id}/`}
+            href={reportHref}
             className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white"
           >
-            평가서
+            세션 평가서
           </Link>
         </div>
       }

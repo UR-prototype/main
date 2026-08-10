@@ -11,52 +11,65 @@ import { ProductJudgmentPanel } from "@/components/ProductJudgmentPanel";
 import { ScoreBreakdown } from "@/components/ScoreBreakdown";
 import { SkillRadar } from "@/components/DashboardCharts";
 import { StatusBadge } from "@/components/StatusBadge";
-import { getAnalysis, getJob, getWorker } from "@/data/mock";
+import {
+  getAnalysis,
+  getSession,
+  getSessionPrimaryVideoId,
+  getWorker,
+  mediaCounts,
+} from "@/data/mock";
 
 export default function ReportClient() {
   const { id } = useParams<{ id: string }>();
-  const job = getJob(id);
-  const analysis = getAnalysis(id);
-  const worker = job ? getWorker(job.workerId) : undefined;
+  const session = getSession(id);
+  const worker = session ? getWorker(session.workerId) : undefined;
+  const primaryVideoId = session ? getSessionPrimaryVideoId(session) : null;
+  const analysis = primaryVideoId ? getAnalysis(primaryVideoId) : undefined;
+  const counts = session ? mediaCounts(session) : { videos: 0, products: 0 };
 
-  if (!job) {
+  if (!session) {
     return (
       <AppShell title="숙련도 평가서">
-        <p className="text-sm text-muted">영상을 찾을 수 없습니다.</p>
+        <p className="text-sm text-muted">평가 세션을 찾을 수 없습니다.</p>
+        <Link href="/evaluation/" className="mt-2 inline-block text-sm text-brand">
+          평가 목록
+        </Link>
       </AppShell>
     );
   }
 
   function downloadJson() {
-    if (!analysis) return;
-    const blob = new Blob([JSON.stringify(analysis, null, 2)], {
+    const payload = {
+      session,
+      primaryAnalysis: analysis ?? null,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${id}-skill-report.json`;
+    a.download = `${session!.regNo}-skill-report.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
 
   function downloadCsv() {
-    if (!analysis) return;
     const lines = [
-      "worker_id,video_id,job_type,skill_score,skill_level,speed,stability,repetition,accuracy,ai_confidence,manual_score,review_status",
+      "reg_no,session_id,worker_id,skill,exam_date,videos,photos,skill_score,skill_level,ncs_review,ai_confidence,manual_score",
       [
-        analysis.workerId,
-        analysis.videoId,
-        analysis.jobType,
-        analysis.skillScore,
-        analysis.skillLevel,
-        analysis.metrics.speed,
-        analysis.metrics.stability,
-        analysis.metrics.repetition,
-        analysis.metrics.accuracy,
-        analysis.confidence.aiConfidence,
-        analysis.manualScore,
-        analysis.reviewStatus,
+        session!.regNo,
+        session!.id,
+        session!.workerId,
+        session!.skill,
+        session!.examDate,
+        counts.videos,
+        counts.products,
+        session!.skillScore ?? "",
+        session!.skillLevel ?? "",
+        session!.ncsReviewStatus ?? "",
+        analysis?.confidence.aiConfidence ?? "",
+        analysis?.manualScore ?? "",
       ].join(","),
     ];
     const blob = new Blob([lines.join("\n")], {
@@ -65,7 +78,7 @@ export default function ReportClient() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${id}-skill-report.csv`;
+    a.download = `${session!.regNo}-skill-report.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -73,15 +86,23 @@ export default function ReportClient() {
   return (
     <AppShell
       title="숙련도 평가서"
-      subtitle={`${worker?.name ?? job.workerId} · 결과 확정 · 내보내기`}
+      subtitle={`${session.regNo} · ${worker?.name ?? session.workerId} · 세션 확정`}
       actions={
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link
-            href={`/analysis/${id}/`}
+            href={`/evaluation/${session.id}/`}
             className="rounded-lg border border-line px-3 py-2 text-sm"
           >
-            분석
+            NCS 평가
           </Link>
+          {primaryVideoId ? (
+            <Link
+              href={`/analysis/${primaryVideoId}/`}
+              className="rounded-lg border border-line px-3 py-2 text-sm"
+            >
+              대표 분석
+            </Link>
+          ) : null}
           <button
             type="button"
             onClick={() => window.print()}
@@ -92,86 +113,110 @@ export default function ReportClient() {
           <button
             type="button"
             onClick={downloadJson}
-            disabled={!analysis}
-            className="rounded-lg border border-line px-3 py-2 text-sm disabled:opacity-40"
+            className="rounded-lg border border-line px-3 py-2 text-sm"
           >
             JSON
           </button>
           <button
             type="button"
             onClick={downloadCsv}
-            disabled={!analysis}
-            className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white disabled:opacity-40"
+            className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white"
           >
             CSV
           </button>
         </div>
       }
     >
-      {!analysis ? (
+      {!analysis && session.status !== "completed" ? (
         <div className="rounded-xl border border-dashed border-line bg-surface p-8 text-center text-sm text-muted">
-          분석 완료 후 평가서를 생성할 수 있습니다.{" "}
-          <StatusBadge status={job.status} />
+          세션 분석 완료 후 평가서를 생성할 수 있습니다.{" "}
+          <span className="ml-1">{session.status}</span>
         </div>
       ) : (
         <article className="report-sheet mx-auto max-w-3xl space-y-6 rounded-xl border border-line bg-surface p-8 shadow-sm print:border-0 print:shadow-none">
           <header className="border-b border-line pb-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-brand">
-              UR Connection · 숙련도 평가서
+              UR Connection · 숙련도 평가서 (세션)
             </p>
             <h2 className="mt-2 text-2xl font-semibold">{worker?.name}</h2>
+            <p className="mt-1 font-mono text-sm text-brand">{session.regNo}</p>
             <p className="mt-1 text-sm text-muted">
-              {analysis.workerId} · {analysis.jobType} · {job.videoName}
+              {session.workerId} · {session.skill} · {session.examDate}
             </p>
-            <p className="mt-1 text-xs text-muted">처리시각 {analysis.processedAt}</p>
+            <p className="mt-1 text-xs text-muted">
+              영상 {counts.videos} · 사진 {counts.products}
+              {session.ncsReviewStatus
+                ? ` · NCS ${session.ncsReviewStatus}`
+                : ""}
+            </p>
+            <ul className="mt-2 space-y-0.5 text-[11px] text-muted">
+              {session.media
+                .filter((m) => m.kind === "video")
+                .map((m) => (
+                  <li key={m.id}>
+                    {m.videoId} · {m.name}
+                  </li>
+                ))}
+            </ul>
           </header>
 
           <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
             <div className="rounded-lg bg-brand-soft p-3">
-              <p className="text-xs text-muted">시스템</p>
+              <p className="text-xs text-muted">세션 점수</p>
               <p className="text-3xl font-semibold text-brand">
-                {analysis.skillScore}
+                {session.skillScore ?? analysis?.skillScore ?? "—"}
               </p>
             </div>
             <div className="rounded-lg bg-bg p-3">
               <p className="text-xs text-muted">등급</p>
-              <p className="text-2xl font-semibold">{analysis.skillLevel}</p>
+              <p className="text-2xl font-semibold">
+                {session.skillLevel ?? analysis?.skillLevel ?? "—"}
+              </p>
             </div>
             <div className="rounded-lg bg-bg p-3">
               <p className="text-xs text-muted">신뢰도</p>
               <p className="text-2xl font-semibold">
-                {analysis.confidence.aiConfidence}%
+                {analysis ? `${analysis.confidence.aiConfidence}%` : "—"}
               </p>
             </div>
             <div className="rounded-lg bg-bg p-3">
               <p className="text-xs text-muted">평가자</p>
-              <p className="text-2xl font-semibold">{analysis.manualScore}</p>
+              <p className="text-2xl font-semibold">
+                {analysis?.manualScore ?? "—"}
+              </p>
             </div>
           </div>
 
-          <ExplainCard result={analysis} />
-
-          <section>
-            <h3 className="mb-2 text-sm font-semibold">세부 점수 · 가중치</h3>
-            <ScoreBreakdown result={analysis} />
-          </section>
-
-          <section>
-            <h3 className="mb-2 text-sm font-semibold">레이더</h3>
-            <SkillRadar metrics={analysis.metrics} />
-          </section>
-
-          <section>
-            <h3 className="mb-2 text-sm font-semibold">이상행동 · 감점</h3>
-            <DeductionList
-              deductions={analysis.deductions}
-              frames={analysis.evidenceFrames}
-            />
-          </section>
-
-          <ProductJudgmentPanel judgment={analysis.productJudgment} />
-          <MatchingCard matching={analysis.matching} />
-          <EvidenceGallery frames={analysis.evidenceFrames} highlightOnly />
+          {analysis ? (
+            <>
+              <ExplainCard result={analysis} />
+              <section>
+                <h3 className="mb-2 text-sm font-semibold">세부 점수 · 가중치</h3>
+                <ScoreBreakdown result={analysis} />
+              </section>
+              <section>
+                <h3 className="mb-2 text-sm font-semibold">레이더</h3>
+                <SkillRadar metrics={analysis.metrics} />
+              </section>
+              <section>
+                <h3 className="mb-2 text-sm font-semibold">이상행동 · 감점</h3>
+                <DeductionList
+                  deductions={analysis.deductions}
+                  frames={analysis.evidenceFrames}
+                />
+              </section>
+              <ProductJudgmentPanel judgment={analysis.productJudgment} />
+              <MatchingCard matching={analysis.matching} />
+              <EvidenceGallery frames={analysis.evidenceFrames} highlightOnly />
+            </>
+          ) : (
+            <p className="text-sm text-muted">
+              대표 영상 분석 상세는 아직 없습니다. 세션 메타는 위와 같습니다.
+              {!primaryVideoId ? null : (
+                <StatusBadge status="queued" />
+              )}
+            </p>
+          )}
         </article>
       )}
     </AppShell>

@@ -19,6 +19,9 @@ export default async function PosePage({
   if (!job) notFound();
   const analysis = getAnalysis(id);
   const worker = getWorker(job.workerId);
+  const reportHref = job.sessionId
+    ? `/reports/${job.sessionId}/`
+    : `/workers/${job.workerId}/`;
 
   return (
     <AppShell
@@ -26,10 +29,10 @@ export default async function PosePage({
       subtitle={`${worker?.name ?? job.workerId} · MediaPipe 관절 추적 근거`}
       actions={
         <Link
-          href={`/reports/${id}/`}
+          href={reportHref}
           className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white"
         >
-          평가서
+          세션 평가서
         </Link>
       }
     >

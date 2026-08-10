@@ -1,10 +1,8 @@
 import EvaluationClient from "./EvaluationClient";
-import { jobs } from "@/data/mock";
+import { assessmentSessions } from "@/data/mock";
 
 export function generateStaticParams() {
-  return jobs
-    .filter((j) => j.status === "completed")
-    .map((j) => ({ id: j.videoId }));
+  return assessmentSessions.map((s) => ({ id: s.id }));
 }
 
 export default function EvaluationDetailPage() {

@@ -5,49 +5,44 @@ import {
   LevelBarChart,
 } from "@/components/DashboardCharts";
 import { AppShell } from "@/components/AppShell";
-import { StatusBadge } from "@/components/StatusBadge";
 import {
-  analyses,
+  assessmentSessions,
   dashboardStats,
+  getSessionPrimaryVideoId,
   getWorker,
-  jobs,
+  mediaCounts,
   opsSummary,
+  sessionNeedsNcsReview,
+  sessionPipelineLabel,
   workers,
 } from "@/data/mock";
-import { formatDuration } from "@/lib/status";
-
-function reviewPendingCount() {
-  return jobs.filter((j) => {
-    if (j.status !== "completed") return false;
-    const a = analyses[j.videoId];
-    return !a || a.reviewStatus === "미검토" || a.reviewStatus === "검토중";
-  }).length;
-}
 
 export default function DashboardPage() {
-  const pendingReview = reviewPendingCount();
-  const inPipeline = opsSummary.inPipeline;
-  const failed = opsSummary.failedJobs;
-  const recent = [...jobs]
-    .sort((a, b) => b.workDate.localeCompare(a.workDate))
-    .slice(0, 8);
+  const pendingReview = assessmentSessions.filter(sessionNeedsNcsReview).length;
+  const inPipeline = assessmentSessions.filter(
+    (s) => sessionPipelineLabel(s) === "in_pipeline",
+  ).length;
+  const failed = assessmentSessions.filter(
+    (s) => sessionPipelineLabel(s) === "failed",
+  ).length;
+  const recent = [...assessmentSessions]
+    .sort((a, b) => b.examDate.localeCompare(a.examDate))
+    .slice(0, 6);
   const attention = [
-    ...jobs.filter((j) => j.status === "failed"),
-    ...jobs.filter((j) =>
-      [
-        "queued",
-        "preprocessing",
-        "pose_extraction",
-        "analyzing",
-        "scoring",
-      ].includes(j.status),
+    ...assessmentSessions.filter((s) => sessionPipelineLabel(s) === "failed"),
+    ...assessmentSessions.filter(
+      (s) => sessionPipelineLabel(s) === "in_pipeline",
     ),
   ].slice(0, 5);
 
   const metrics = [
-    { label: "오늘 완료", value: opsSummary.todayCompleted, href: "/work/" },
+    {
+      label: "세션",
+      value: assessmentSessions.length,
+      href: "/work/",
+    },
     { label: "진행 중", value: inPipeline, href: "/work/progress/" },
-    { label: "검토 대기", value: pendingReview, href: "/evaluation/" },
+    { label: "NCS 대기", value: pendingReview, href: "/evaluation/" },
     {
       label: "실패",
       value: failed,
@@ -70,7 +65,7 @@ export default function DashboardPage() {
   return (
     <AppShell
       title="대시보드"
-      subtitle="등록 → 라벨링 → NCS 평가"
+      subtitle="평가 세션 기준 · 등록 → 라벨링 → NCS"
       actions={
         <div className="flex gap-1.5">
           <Link
@@ -120,7 +115,7 @@ export default function DashboardPage() {
       <div className="grid gap-3 lg:grid-cols-12">
         <section className="overflow-hidden rounded-lg border border-line bg-surface lg:col-span-8">
           <div className="flex items-center justify-between border-b border-line px-3 py-2">
-            <h2 className="text-xs font-semibold">최근 영상</h2>
+            <h2 className="text-xs font-semibold">최근 평가 세션</h2>
             <Link
               href="/work/"
               className="inline-flex items-center gap-0.5 text-[11px] text-brand hover:underline"
@@ -133,47 +128,50 @@ export default function DashboardPage() {
             <table className="w-full min-w-[36rem] text-left text-xs">
               <thead className="bg-bg text-[10px] text-muted">
                 <tr>
+                  <th className="px-3 py-2 font-medium">등록번호</th>
                   <th className="px-3 py-2 font-medium">기술자</th>
-                  <th className="px-3 py-2 font-medium">직종</th>
-                  <th className="px-3 py-2 font-medium">영상</th>
-                  <th className="px-3 py-2 font-medium">길이</th>
-                  <th className="px-3 py-2 font-medium">상태</th>
+                  <th className="px-3 py-2 font-medium">기술</th>
+                  <th className="px-3 py-2 font-medium">일자</th>
+                  <th className="px-3 py-2 font-medium">미디어</th>
                   <th className="px-3 py-2 font-medium">결과</th>
                 </tr>
               </thead>
               <tbody>
-                {recent.map((j) => {
-                  const w = getWorker(j.workerId);
-                  const score = j.skillScore ?? analyses[j.videoId]?.skillScore;
+                {recent.map((s) => {
+                  const w = getWorker(s.workerId);
+                  const c = mediaCounts(s);
                   return (
-                    <tr key={j.id} className="border-t border-line">
+                    <tr key={s.id} className="border-t border-line">
+                      <td className="px-3 py-2 font-mono text-[11px] text-brand">
+                        <Link
+                          href={`/evaluation/${s.id}/`}
+                          className="hover:underline"
+                        >
+                          {s.regNo}
+                        </Link>
+                      </td>
                       <td className="px-3 py-2">
                         <Link
-                          href={`/workers/${j.workerId}/`}
+                          href={`/workers/${s.workerId}/`}
                           className="font-medium hover:text-brand"
                         >
                           {w?.name}
                         </Link>
                       </td>
-                      <td className="px-3 py-2 text-muted">{j.jobType}</td>
-                      <td className="px-3 py-2 font-mono text-[11px] text-muted">
-                        {j.videoId}
-                      </td>
-                      <td className="px-3 py-2 tabular-nums text-muted">
-                        {formatDuration(j.durationSec)}
+                      <td className="px-3 py-2 text-muted">{s.skill}</td>
+                      <td className="px-3 py-2 text-muted">{s.examDate}</td>
+                      <td className="px-3 py-2 text-muted">
+                        영상 {c.videos} · 사진 {c.products}
                       </td>
                       <td className="px-3 py-2">
-                        <StatusBadge status={j.status} />
-                      </td>
-                      <td className="px-3 py-2">
-                        {j.status === "completed" ? (
+                        {s.status === "completed" ? (
                           <Link
-                            href={`/analysis/${j.videoId}/`}
+                            href={`/evaluation/${s.id}/`}
                             className="font-medium text-brand hover:underline"
                           >
-                            {score != null ? `${score}` : "결과"}
+                            {s.skillScore != null ? `${s.skillScore}` : "평가"}
                           </Link>
-                        ) : j.status === "failed" ? (
+                        ) : s.status === "failed" ? (
                           <Link
                             href="/work/failed/"
                             className="text-danger hover:underline"
@@ -199,7 +197,7 @@ export default function DashboardPage() {
 
         <section className="rounded-lg border border-line bg-surface p-3 lg:col-span-4">
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-xs font-semibold">우선 처리</h2>
+            <h2 className="text-xs font-semibold">우선 처리 (세션)</h2>
             <Link
               href="/work/failed/"
               className="text-[11px] text-brand hover:underline"
@@ -211,28 +209,35 @@ export default function DashboardPage() {
             <p className="py-6 text-center text-xs text-muted">이슈 없음</p>
           ) : (
             <ul className="divide-y divide-line">
-              {attention.map((j) => {
-                const w = getWorker(j.workerId);
+              {attention.map((s) => {
+                const w = getWorker(s.workerId);
+                const pipe = sessionPipelineLabel(s);
                 return (
                   <li
-                    key={j.id}
+                    key={s.id}
                     className="flex items-center justify-between gap-2 py-2 first:pt-0 last:pb-0"
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-xs font-medium">
-                        {w?.name ?? j.workerId}
+                      <p className="truncate font-mono text-[10px] text-brand">
+                        {s.regNo}
                       </p>
-                      <p className="truncate text-[10px] text-muted">
-                        {j.videoId} · {j.jobType}
+                      <p className="truncate text-xs font-medium">
+                        {w?.name} · {s.skill}
                       </p>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-1">
-                      <StatusBadge status={j.status} />
+                      <span className="text-[10px] text-muted">
+                        {pipe === "failed"
+                          ? "실패"
+                          : pipe === "in_pipeline"
+                            ? "진행"
+                            : s.status}
+                      </span>
                       <Link
                         href={
-                          j.status === "failed"
+                          pipe === "failed"
                             ? "/work/failed/"
-                            : `/analysis/${j.videoId}/`
+                            : `/evaluation/${s.id}/`
                         }
                         className="text-[10px] text-brand hover:underline"
                       >
@@ -247,7 +252,7 @@ export default function DashboardPage() {
           {failed > 0 ? (
             <p className="mt-2 flex items-start gap-1 rounded bg-red-50 px-2 py-1.5 text-[10px] text-danger">
               <AlertOctagon size={11} className="mt-0.5 shrink-0" />
-              실패 {failed}건 재실행 필요
+              실패 세션 {failed}건 재실행 필요
             </p>
           ) : null}
         </section>

@@ -1,8 +1,8 @@
 import ReportClient from "./ReportClient";
-import { jobs } from "@/data/mock";
+import { assessmentSessions } from "@/data/mock";
 
 export function generateStaticParams() {
-  return jobs.map((j) => ({ id: j.videoId }));
+  return assessmentSessions.map((s) => ({ id: s.id }));
 }
 
 export default function ReportPage() {

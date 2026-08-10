@@ -100,6 +100,8 @@ export type AssessmentSession = {
   skillLevel?: SkillLevel | null;
   assignee?: string | null;
   note?: string;
+  /** 세션 단위 NCS·전문가 확정 상태 */
+  ncsReviewStatus?: ReviewStatus;
   media: SessionMedia[];
   jobIds: string[];
 };
@@ -498,6 +500,7 @@ export const assessmentSessions: AssessmentSession[] = [
     skillLevel: "중급",
     assignee: "평가자 A",
     note: "기량검증 · 영상 2건 + 결과물 사진 다건",
+    ncsReviewStatus: "승인",
     jobIds: ["J-101", "J-101B"],
     media: [
       {
@@ -551,6 +554,7 @@ export const assessmentSessions: AssessmentSession[] = [
     skillLevel: "중급",
     assignee: "평가자 A",
     note: "경험 영상 재평가",
+    ncsReviewStatus: "검토중",
     jobIds: ["J-102"],
     media: [
       {
@@ -578,6 +582,7 @@ export const assessmentSessions: AssessmentSession[] = [
     skillScore: 72,
     skillLevel: "중급",
     assignee: "평가자 B",
+    ncsReviewStatus: "미검토",
     jobIds: ["J-103"],
     media: [
       {
@@ -599,6 +604,7 @@ export const assessmentSessions: AssessmentSession[] = [
     skillScore: 86,
     skillLevel: "고급",
     assignee: "평가자 B",
+    ncsReviewStatus: "승인",
     jobIds: ["J-201"],
     media: [
       {
@@ -1352,8 +1358,36 @@ export function mediaCounts(session: AssessmentSession) {
   return { videos, products };
 }
 
+/** 세션 대표 영상(분석·평가서 연결용) — 첫 completed 분석 가능 영상 */
+export function getSessionPrimaryVideoId(session: AssessmentSession) {
+  const sessionJobs = getJobsBySession(session.id);
+  const withAnalysis = sessionJobs.find(
+    (j) => j.status === "completed" && analyses[j.videoId],
+  );
+  if (withAnalysis) return withAnalysis.videoId;
+  const anyVideo = session.media.find((m) => m.kind === "video" && m.videoId);
+  return anyVideo?.videoId ?? sessionJobs[0]?.videoId ?? null;
+}
+
+export function sessionPipelineLabel(session: AssessmentSession) {
+  const js = getJobsBySession(session.id);
+  if (session.status === "failed" || js.some((j) => j.status === "failed"))
+    return "failed" as const;
+  if (session.status === "completed" && js.every((j) => j.status === "completed"))
+    return "completed" as const;
+  if (js.some((j) => ["queued", "preprocessing", "pose_extraction", "analyzing", "scoring", "uploaded"].includes(j.status)))
+    return "in_pipeline" as const;
+  return session.status;
+}
+
+export function sessionNeedsNcsReview(session: AssessmentSession) {
+  if (session.status !== "completed") return false;
+  const st = session.ncsReviewStatus ?? "미검토";
+  return st === "미검토" || st === "검토중";
+}
+
 export function suggestRegNo(examDate: string, workerId: string) {
-  const compact = examDate.replaceAll("-", "");
+  const compact = examDate.replace(/-/g, "");
   const seq = String(
     assessmentSessions.filter((s) => s.examDate === examDate).length + 1,
   ).padStart(3, "0");
@@ -1416,5 +1450,5 @@ export const iaBreadcrumb = [
   { label: "Worker", href: "/workers" },
   { label: "Video/Jobs", href: "/jobs" },
   { label: "Analysis", href: "/analysis/V-101" },
-  { label: "Report", href: "/reports/V-101" },
+  { label: "Report", href: "/reports/S-001" },
 ];

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { AnalysisResult } from "@/data/mock";
+import { getJob } from "@/data/mock";
 import { eventMeta, stageMeta } from "@/data/ncs";
 
 function fmt(t: number) {
@@ -8,7 +9,7 @@ function fmt(t: number) {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-/** 라벨 → Feature → 규칙 → 화면 근거 체인 (고객 브리핑 SLIDE 14) */
+/** 라벨 → Feature → 규칙 → 세션 NCS 근거 체인 */
 export function EvidenceChain({
   result,
   videoId,
@@ -18,6 +19,10 @@ export function EvidenceChain({
 }) {
   const idle = result.ncsEvents?.find((e) => e.type === "EVENT_IDLE");
   const deduction = result.deductions.find((d) => d.key === "idle_long");
+  const job = getJob(videoId);
+  const evalHref = job?.sessionId
+    ? `/evaluation/${job.sessionId}/`
+    : "/evaluation/";
 
   if (!idle && !deduction) {
     return (
@@ -39,13 +44,10 @@ export function EvidenceChain({
         <div>
           <h2 className="text-sm font-semibold">근거 체인 · 설명 가능성</h2>
           <p className="mt-0.5 text-[11px] text-muted">
-            라벨(사실) → Pose·Feature → 규칙 감점 → 대시보드
+            라벨 → Pose·Feature → 규칙 → 세션 NCS 평가
           </p>
         </div>
-        <Link
-          href="/labeling/"
-          className="text-[11px] text-brand hover:underline"
-        >
+        <Link href="/labeling/" className="text-[11px] text-brand hover:underline">
           타임라인 라벨
         </Link>
       </div>
@@ -70,8 +72,7 @@ export function EvidenceChain({
         </Step>
         <Step n={2} title="Pose · Feature">
           <p>
-            idle_time{" "}
-            <b className="text-ink">{result.features.idle_time}s</b>
+            idle_time <b className="text-ink">{result.features.idle_time}s</b>
           </p>
           <p className="mt-1 text-[10px] text-muted">
             Pose 품질 {result.confidence.poseTrackingQuality}%
@@ -89,15 +90,15 @@ export function EvidenceChain({
             <p className="text-muted">감점 없음</p>
           )}
         </Step>
-        <Step n={4} title="평가 · NCS">
+        <Step n={4} title="세션 · NCS">
           <p className="text-[11px]">
-            Idle만으로 E2 미달 처리하지 않음. 교육·효율 근거의 시각으로 사용.
+            숙련 확정은 영상 단위가 아니라 평가 세션 단위입니다.
           </p>
           <Link
-            href={`/evaluation/${videoId}/`}
+            href={evalHref}
             className="mt-1 inline-block text-[11px] text-brand hover:underline"
           >
-            NCS 루브릭
+            세션 NCS 평가
           </Link>
         </Step>
       </ol>

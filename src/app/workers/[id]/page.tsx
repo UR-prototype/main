@@ -105,7 +105,6 @@ export default async function WorkerDetailPage({
           const c = mediaCounts(s);
           const videos = s.media.filter((m) => m.kind === "video");
           const photos = s.media.filter((m) => m.kind !== "video");
-          const primaryVideo = videos.find((v) => v.videoId)?.videoId;
           return (
             <article
               key={s.id}
@@ -209,15 +208,18 @@ export default async function WorkerDetailPage({
               </div>
 
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                {primaryVideo &&
-                (primaryVideo === "V-101" || primaryVideo === "V-201") ? (
-                  <Link
-                    href={`/evaluation/${primaryVideo}/`}
-                    className="text-brand hover:underline"
-                  >
-                    NCS 평가
-                  </Link>
-                ) : null}
+                <Link
+                  href={`/evaluation/${s.id}/`}
+                  className="text-brand hover:underline"
+                >
+                  세션 NCS 평가
+                </Link>
+                <Link
+                  href={`/reports/${s.id}/`}
+                  className="text-brand hover:underline"
+                >
+                  세션 평가서
+                </Link>
                 <Link
                   href="/register/product/"
                   className="text-brand hover:underline"

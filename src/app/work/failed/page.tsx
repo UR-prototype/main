@@ -1,12 +1,12 @@
-import { WorkJobsTable } from "@/components/WorkJobsTable";
+import { WorkSessionsTable } from "@/components/WorkSessionsTable";
 
 export default function WorkFailedPage() {
   return (
     <div>
       <p className="mb-4 text-sm text-muted">
-        분석 실패 건만 모아 재실행·담당자 배정합니다. (기존 「실패 건」 메뉴를 이 탭으로 통합)
+        세션 또는 세션 내 영상 분석이 실패한 건을 모아 재실행합니다.
       </p>
-      <WorkJobsTable mode="failed" />
+      <WorkSessionsTable mode="failed" />
     </div>
   );
 }

@@ -1,12 +1,14 @@
-import { WorkJobsTable } from "@/components/WorkJobsTable";
+import { WorkSessionsTable } from "@/components/WorkSessionsTable";
 
 export default function WorkAllPage() {
   return (
     <div>
       <p className="mb-4 text-sm text-muted">
-        등록된 작업 영상 전체입니다. 분석 상태·실패는 위 탭에서 같은 목록을 목적별로 봅니다.
+        <b className="font-medium text-ink">평가 세션</b> 전체입니다. 사람 ×
+        평가기술 × 일자 × 등록번호 단위이며, 세션마다 영상·사진이 여러 개일 수
+        있습니다.
       </p>
-      <WorkJobsTable mode="all" />
+      <WorkSessionsTable mode="all" />
     </div>
   );
 }

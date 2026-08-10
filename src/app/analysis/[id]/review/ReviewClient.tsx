@@ -15,6 +15,12 @@ export default function ReviewClient() {
   const job = getJob(id);
   const analysis = getAnalysis(id);
   const worker = job ? getWorker(job.workerId) : undefined;
+  const sessionHref = job?.sessionId
+    ? `/evaluation/${job.sessionId}/`
+    : "/evaluation/";
+  const reportHref = job?.sessionId
+    ? `/reports/${job.sessionId}/`
+    : `/workers/${job?.workerId ?? ""}/`;
   const [manual, setManual] = useState(
     analysis?.manualScore ?? analysis?.skillScore ?? 0,
   );
@@ -33,14 +39,22 @@ export default function ReviewClient() {
   return (
     <AppShell
       title="검토 · 승인"
-      subtitle={`${worker?.name ?? job.workerId} · 점수 보정 및 승인`}
+      subtitle={`${worker?.name ?? job.workerId} · 영상 AI 검토 (숙련 확정은 세션 NCS)`}
       actions={
-        <Link
-          href={`/reports/${id}/`}
-          className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white"
-        >
-          평가서
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href={sessionHref}
+            className="rounded-lg border border-line px-3 py-2 text-sm"
+          >
+            세션 NCS
+          </Link>
+          <Link
+            href={reportHref}
+            className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white"
+          >
+            세션 평가서
+          </Link>
+        </div>
       }
     >
       <AnalysisTabs videoId={id} />
