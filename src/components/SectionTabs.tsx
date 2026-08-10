@@ -74,6 +74,11 @@ export const registerTabs: SectionTab[] = [
 
 export const labelingTabs: SectionTab[] = [
   {
+    href: "/labeling/library/",
+    label: "미디어 목록",
+    match: (p) => p === "/labeling/library",
+  },
+  {
     href: "/labeling/",
     label: "타임라인",
     match: (p) => p === "/labeling",

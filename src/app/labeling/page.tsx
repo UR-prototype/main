@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
   ChevronLeft,
@@ -13,7 +14,8 @@ import {
   Trash2,
   Volume2,
 } from "lucide-react";
-import { analyses, getWorker, jobs } from "@/data/mock";
+import { LabelingMediaBrowser } from "@/components/LabelingMediaBrowser";
+import { analyses, getJob, getSession, getWorker, jobs } from "@/data/mock";
 import {
   NCS_MOLD_ASSY,
   NCS_STAGES,
@@ -25,6 +27,7 @@ import {
   type NcsStageId,
 } from "@/data/ncs";
 import { asset } from "@/lib/asset";
+import type { LabelingMediaItem } from "@/lib/labelingMedia";
 
 type StudioTab = "video" | "stage" | "anomaly";
 type IntervalKind = "stage" | "anomaly";
@@ -73,17 +76,31 @@ function sparkPath(values: number[], w: number, h: number) {
     .join(" ");
 }
 
-export default function TimelineLabelingPage() {
+function TimelineLabelingInner() {
+  const search = useSearchParams();
+  const qVideo = search.get("video");
+  const qSession = search.get("session");
+
   const completed = useMemo(
     () => jobs.filter((j) => j.status === "completed"),
     [],
   );
   const [videoId, setVideoId] = useState(
-    completed.find((j) => j.videoId === "V-101")?.videoId ??
+    qVideo ??
+      completed.find((j) => j.videoId === "V-101")?.videoId ??
       completed[0]?.videoId ??
       "V-101",
   );
-  const job = jobs.find((j) => j.videoId === videoId) ?? jobs[0]!;
+  const [showPicker, setShowPicker] = useState(true);
+
+  useEffect(() => {
+    if (qVideo) setVideoId(qVideo);
+  }, [qVideo]);
+
+  const job = getJob(videoId) ?? jobs[0]!;
+  const session =
+    (qSession ? getSession(qSession) : null) ??
+    (job.sessionId ? getSession(job.sessionId) : undefined);
   const worker = getWorker(job.workerId);
   const analysis = analyses[job.videoId];
   const frames = analysis?.evidenceFrames ?? [];
@@ -357,6 +374,10 @@ export default function TimelineLabelingPage() {
     setVideoId(next.videoId);
     setT(0);
     setSelected(null);
+    const url = new URL(window.location.href);
+    if (next.sessionId) url.searchParams.set("session", next.sessionId);
+    url.searchParams.set("video", next.videoId);
+    window.history.replaceState({}, "", url.pathname + url.search);
   }
 
   function finishSave() {
@@ -366,8 +387,55 @@ export default function TimelineLabelingPage() {
 
   const ticks = [0, 60, 120, 180, 240, 300, 347];
 
+  function pickMedia(item: LabelingMediaItem) {
+    if (item.mediaKind !== "video" || !item.media.videoId) return;
+    setVideoId(item.media.videoId);
+    setT(0);
+    setSelected(null);
+    const url = new URL(window.location.href);
+    url.searchParams.set("session", item.sessionId);
+    url.searchParams.set("video", item.media.videoId);
+    window.history.replaceState({}, "", url.pathname + url.search);
+  }
+
   return (
     <div className="space-y-3">
+      <div className="rounded-lg border border-line bg-surface">
+        <button
+          type="button"
+          onClick={() => setShowPicker((v) => !v)}
+          className="flex w-full items-center justify-between px-3 py-2 text-left text-xs font-medium"
+        >
+          <span>
+            영상 선택 · 필터
+            {session ? (
+              <span className="ml-2 font-normal text-muted">
+                {session.regNo} · {worker?.name ?? job.workerId}
+              </span>
+            ) : null}
+          </span>
+          <span className="text-muted">{showPicker ? "접기" : "펼치기"}</span>
+        </button>
+        {showPicker ? (
+          <div className="border-t border-line px-3 py-3">
+            <LabelingMediaBrowser
+              mode="compact"
+              initialWorkerId={session?.workerId ?? job.workerId}
+              initialSessionId={session?.id ?? "all"}
+              initialMediaKind="video"
+              selectedKeys={
+                session
+                  ? session.media
+                      .filter((m) => m.videoId === videoId)
+                      .map((m) => `${session.id}:${m.id}`)
+                  : undefined
+              }
+              onPick={pickMedia}
+            />
+          </div>
+        ) : null}
+      </div>
+
       {/* Session meta */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-line bg-surface px-3 py-2.5 text-xs">
         <Meta
@@ -375,6 +443,12 @@ export default function TimelineLabelingPage() {
           value={`${worker?.name ?? job.workerId} [${job.workerId}]`}
         />
         <Sep />
+        {session ? (
+          <>
+            <Meta label="세션" value={session.regNo} />
+            <Sep />
+          </>
+        ) : null}
         <Meta
           label="작업"
           value={`${job.jobType} · ${job.videoKind === "experience" ? "Experience" : "Skills Verification"}`}
@@ -392,8 +466,14 @@ export default function TimelineLabelingPage() {
           <select
             value={videoId}
             onChange={(e) => {
-              setVideoId(e.target.value);
+              const id = e.target.value;
+              setVideoId(id);
               setT(0);
+              const j = getJob(id);
+              const url = new URL(window.location.href);
+              if (j?.sessionId) url.searchParams.set("session", j.sessionId);
+              url.searchParams.set("video", id);
+              window.history.replaceState({}, "", url.pathname + url.search);
             }}
             className="max-w-[14rem] truncate rounded border border-line bg-bg px-1.5 py-0.5 font-medium"
           >
@@ -1076,5 +1156,17 @@ function TrackCanvas({
         style={{ left: `${progress}%` }}
       />
     </div>
+  );
+}
+
+export default function TimelineLabelingPage() {
+  return (
+    <Suspense
+      fallback={
+        <p className="text-sm text-muted">타임라인 라벨링을 불러오는 중…</p>
+      }
+    >
+      <TimelineLabelingInner />
+    </Suspense>
   );
 }

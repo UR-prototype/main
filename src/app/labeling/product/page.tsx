@@ -1,8 +1,18 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { jobs, workers } from "@/data/mock";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { LabelingMediaBrowser } from "@/components/LabelingMediaBrowser";
+import {
+  getSession,
+  getWorker,
+  type SessionMedia,
+} from "@/data/mock";
 import { asset } from "@/lib/asset";
+import {
+  buildLabelingCatalog,
+  type LabelingMediaItem,
+} from "@/lib/labelingMedia";
 
 type Box = {
   id: string;
@@ -22,11 +32,58 @@ const ISSUE_LABELS = [
   "기타",
 ];
 
-export default function ProductLabelingPage() {
-  const imgRef = useRef<HTMLDivElement>(null);
-  const [drag, setDrag] = useState<{ x0: number; y0: number; x1: number; y1: number } | null>(
-    null,
+function ProductLabelingInner() {
+  const search = useSearchParams();
+  const qSession = search.get("session");
+  const qMedia = search.get("media");
+
+  const catalog = useMemo(() => buildLabelingCatalog(), []);
+  const images = useMemo(
+    () => catalog.filter((c) => c.mediaKind === "image"),
+    [catalog],
   );
+
+  const initial = useMemo(() => {
+    if (qSession && qMedia) {
+      const hit = images.find(
+        (i) => i.sessionId === qSession && i.media.id === qMedia,
+      );
+      if (hit) return hit;
+    }
+    if (qSession) {
+      const hit = images.find((i) => i.sessionId === qSession);
+      if (hit) return hit;
+    }
+    return images[0] ?? null;
+  }, [images, qSession, qMedia]);
+
+  const [sessionId, setSessionId] = useState(initial?.sessionId ?? "");
+  const [mediaId, setMediaId] = useState(initial?.media.id ?? "");
+  const [showPicker, setShowPicker] = useState(true);
+
+  useEffect(() => {
+    if (initial) {
+      setSessionId(initial.sessionId);
+      setMediaId(initial.media.id);
+    }
+  }, [initial]);
+
+  const session = sessionId ? getSession(sessionId) : undefined;
+  const worker = session ? getWorker(session.workerId) : undefined;
+  const media: SessionMedia | undefined = session?.media.find(
+    (m) => m.id === mediaId,
+  );
+  const imgSrc = media?.src
+    ? asset(media.src)
+    : asset("/evidence/products/product-candidate.png");
+
+  const imgRef = useRef<HTMLDivElement>(null);
+  const [drag, setDrag] = useState<{
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
+  } | null>(null);
   const [label, setLabel] = useState(ISSUE_LABELS[0]!);
   const [note, setNote] = useState("");
   const [boxes, setBoxes] = useState<Box[]>([
@@ -40,6 +97,21 @@ export default function ProductLabelingPage() {
       note: "맞춤면 간격 초과 (AI 제안)",
     },
   ]);
+
+  function syncUrl(sId: string, mId: string) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("session", sId);
+    url.searchParams.set("media", mId);
+    window.history.replaceState({}, "", url.pathname + url.search);
+  }
+
+  function pickMedia(item: LabelingMediaItem) {
+    if (item.mediaKind !== "image") return;
+    setSessionId(item.sessionId);
+    setMediaId(item.media.id);
+    setBoxes([]);
+    syncUrl(item.sessionId, item.media.id);
+  }
 
   function relPos(e: React.MouseEvent) {
     const el = imgRef.current;
@@ -92,25 +164,80 @@ export default function ProductLabelingPage() {
       }
     : null;
 
+  const sessionImages =
+    session?.media.filter((m) => m.kind !== "video") ?? [];
+
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted">
-        결과 조형물 이미지 위에 <b className="font-medium text-ink">문제 영역 좌표(박스)</b>를
-        표시합니다. 드래그로 bbox를 그리고 라벨을 지정합니다.
+        결과 조형물 이미지 위에{" "}
+        <b className="font-medium text-ink">문제 영역 좌표(박스)</b>를
+        표시합니다. 사람·세션·이미지 필터로 대상을 고른 뒤 드래그로 bbox를
+        그립니다.
       </p>
 
-      <div className="flex flex-wrap items-center gap-3 text-sm">
-        <label>
-          <span className="mr-2 text-xs text-muted">연결 영상</span>
-          <select className="rounded-lg border border-line bg-surface px-3 py-1.5">
-            {jobs.map((j) => {
-              const w = workers.find((x) => x.id === j.workerId);
-              return (
-                <option key={j.id} value={j.videoId}>
-                  {j.videoId} · {w?.name}
-                </option>
-              );
-            })}
+      <div className="rounded-lg border border-line bg-surface">
+        <button
+          type="button"
+          onClick={() => setShowPicker((v) => !v)}
+          className="flex w-full items-center justify-between px-3 py-2 text-left text-xs font-medium"
+        >
+          <span>
+            이미지 선택 · 필터
+            {session && media ? (
+              <span className="ml-2 font-normal text-muted">
+                {session.regNo} · {media.name}
+              </span>
+            ) : null}
+          </span>
+          <span className="text-muted">{showPicker ? "접기" : "펼치기"}</span>
+        </button>
+        {showPicker ? (
+          <div className="border-t border-line px-3 py-3">
+            <LabelingMediaBrowser
+              mode="compact"
+              initialWorkerId={session?.workerId ?? "all"}
+              initialSessionId={sessionId || "all"}
+              initialMediaKind="image"
+              selectedKeys={
+                sessionId && mediaId ? [`${sessionId}:${mediaId}`] : undefined
+              }
+              onPick={pickMedia}
+            />
+          </div>
+        ) : null}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-line bg-surface px-3 py-2.5 text-xs">
+        <span>
+          <span className="text-muted">기술자 </span>
+          <b className="font-medium">
+            {worker?.name ?? session?.workerId ?? "—"}
+          </b>
+        </span>
+        <span className="text-line">|</span>
+        <span>
+          <span className="text-muted">세션 </span>
+          <b className="font-medium">{session?.regNo ?? "—"}</b>
+        </span>
+        <span className="text-line">|</span>
+        <label className="inline-flex items-center gap-1.5">
+          <span className="text-muted">이미지</span>
+          <select
+            value={mediaId}
+            onChange={(e) => {
+              const id = e.target.value;
+              setMediaId(id);
+              setBoxes([]);
+              if (sessionId) syncUrl(sessionId, id);
+            }}
+            className="max-w-[16rem] truncate rounded border border-line bg-bg px-1.5 py-0.5 font-medium"
+          >
+            {sessionImages.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
           </select>
         </label>
       </div>
@@ -127,8 +254,8 @@ export default function ProductLabelingPage() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={asset("/evidence/products/product-candidate.png")}
-              alt="결과 조형물"
+              src={imgSrc}
+              alt={media?.name ?? "결과 조형물"}
               className="pointer-events-none h-full w-full object-contain"
               draggable={false}
             />
@@ -193,7 +320,10 @@ export default function ProductLabelingPage() {
 
           <ul className="mt-4 max-h-80 space-y-2 overflow-y-auto text-sm">
             {boxes.map((b) => (
-              <li key={b.id} className="rounded-lg border border-line bg-bg px-3 py-2">
+              <li
+                key={b.id}
+                className="rounded-lg border border-line bg-bg px-3 py-2"
+              >
                 <p className="font-medium">{b.label}</p>
                 <p className="font-mono text-[11px] text-muted">
                   x:{b.x.toFixed(1)}% y:{b.y.toFixed(1)}% w:{b.w.toFixed(1)}% h:
@@ -203,7 +333,9 @@ export default function ProductLabelingPage() {
                 <button
                   type="button"
                   className="mt-1 text-[11px] text-danger hover:underline"
-                  onClick={() => setBoxes((prev) => prev.filter((x) => x.id !== b.id))}
+                  onClick={() =>
+                    setBoxes((prev) => prev.filter((x) => x.id !== b.id))
+                  }
                 >
                   삭제
                 </button>
@@ -213,5 +345,17 @@ export default function ProductLabelingPage() {
         </section>
       </div>
     </div>
+  );
+}
+
+export default function ProductLabelingPage() {
+  return (
+    <Suspense
+      fallback={
+        <p className="text-sm text-muted">조형물 좌표 라벨링을 불러오는 중…</p>
+      }
+    >
+      <ProductLabelingInner />
+    </Suspense>
   );
 }

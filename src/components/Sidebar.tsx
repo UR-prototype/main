@@ -32,7 +32,7 @@ const nav = [
     match: (p: string) => p === "/register" || p.startsWith("/register/"),
   },
   {
-    href: "/labeling/",
+    href: "/labeling/library/",
     label: "라벨링",
     icon: Tags,
     match: (p: string) => p === "/labeling" || p.startsWith("/labeling/"),

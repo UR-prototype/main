@@ -9,7 +9,7 @@ export default function LabelingLayout({
   return (
     <AppShell
       title="라벨링"
-      subtitle="영상 · 작업 단계 · 이상행동 라벨링"
+      subtitle="미디어 목록 · 타임라인 Stage/Event · 조형물 좌표"
     >
       <SectionTabs tabs={labelingTabs} />
       {children}
