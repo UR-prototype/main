@@ -74,7 +74,7 @@ export function UploadModal({
               작업 영상 업로드
             </h2>
             <p className="mt-0.5 text-xs text-muted">
-              기술자·직종을 지정한 뒤 분석 대기열에 등록합니다.
+              기술자를 먼저 지정한 뒤, 해당 인력 묶음으로 영상을 올립니다.
             </p>
           </div>
           <button
@@ -107,7 +107,9 @@ export function UploadModal({
         ) : (
           <form onSubmit={submit} className="space-y-4 px-5 py-5">
             <label className="block text-sm">
-              <span className="mb-1 block text-xs text-muted">기술자</span>
+              <span className="mb-1 block text-xs text-muted">
+                기술자 (영상 소유자)
+              </span>
               <select
                 value={workerId}
                 onChange={(e) => {
@@ -124,6 +126,14 @@ export function UploadModal({
                   </option>
                 ))}
               </select>
+              {worker ? (
+                <p className="mt-1.5 rounded-md bg-brand-soft/40 px-2 py-1.5 text-[11px] text-muted">
+                  묶음 대상:{" "}
+                  <span className="font-medium text-ink">
+                    {worker.name} · {worker.company}
+                  </span>
+                </p>
+              ) : null}
             </label>
 
             <label className="block text-sm">
