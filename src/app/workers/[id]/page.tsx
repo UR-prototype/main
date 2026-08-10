@@ -3,12 +3,25 @@ import { notFound } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { ScoreTrendChart } from "@/components/DashboardCharts";
 import { StatusBadge } from "@/components/StatusBadge";
-import { getJobsByWorker, getWorker, workers } from "@/data/mock";
+import {
+  getSessionsByWorker,
+  getWorker,
+  mediaCounts,
+  workers,
+} from "@/data/mock";
+import { asset } from "@/lib/asset";
 import { formatDuration } from "@/lib/status";
 
 export function generateStaticParams() {
   return workers.map((w) => ({ id: w.id }));
 }
+
+const sessionStatusLabel = {
+  draft: "작성중",
+  in_progress: "진행중",
+  completed: "완료",
+  failed: "실패",
+} as const;
 
 export default async function WorkerDetailPage({
   params,
@@ -18,21 +31,27 @@ export default async function WorkerDetailPage({
   const { id } = await params;
   const worker = getWorker(id);
   if (!worker) notFound();
-  const workerJobs = [...getJobsByWorker(id)].sort((a, b) =>
-    b.workDate.localeCompare(a.workDate),
-  );
+  const sessions = getSessionsByWorker(id);
 
   return (
     <AppShell
       title={worker.name}
-      subtitle={`${worker.id} · ${worker.skill}`}
+      subtitle={`${worker.id} · ${worker.skill} · 평가 ${sessions.length}회`}
       actions={
-        <Link
-          href="/workers/"
-          className="rounded-lg border border-line px-3 py-2 text-sm"
-        >
-          목록
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/register/"
+            className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white"
+          >
+            새 평가 등록
+          </Link>
+          <Link
+            href="/workers/"
+            className="rounded-lg border border-line px-3 py-2 text-sm"
+          >
+            목록
+          </Link>
+        </div>
       }
     >
       <div className="grid gap-4 lg:grid-cols-3">
@@ -41,7 +60,7 @@ export default async function WorkerDetailPage({
           <dl className="mt-4 space-y-3 text-sm">
             <Row k="국적" v={worker.nationality} />
             <Row k="나이" v={String(worker.age)} />
-            <Row k="직종" v={worker.skill} />
+            <Row k="주 직종" v={worker.skill} />
             <Row k="에이전시" v={worker.agency} />
             <Row k="회사" v={worker.company} />
             <Row k="등록일" v={worker.registeredAt} />
@@ -60,20 +79,6 @@ export default async function WorkerDetailPage({
               }
             />
           </dl>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link
-              href={`/workers/compare/?trade=${encodeURIComponent(worker.skill)}`}
-              className="text-xs text-brand hover:underline"
-            >
-              같은 직종 비교
-            </Link>
-            <Link
-              href="/workers/compare/"
-              className="text-xs text-brand hover:underline"
-            >
-              직종·비교
-            </Link>
-          </div>
         </section>
 
         <section className="rounded-xl border border-line bg-surface p-5 lg:col-span-2">
@@ -86,63 +91,152 @@ export default async function WorkerDetailPage({
         </section>
       </div>
 
-      <section className="mt-6 rounded-xl border border-line bg-surface p-5">
-        <h2 className="mb-4 text-sm font-semibold">분석 이력</h2>
-        <div className="overflow-hidden rounded-lg border border-line">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-bg text-xs text-muted">
-              <tr>
-                <th className="px-3 py-2">날짜</th>
-                <th className="px-3 py-2">영상</th>
-                <th className="px-3 py-2">점수</th>
-                <th className="px-3 py-2">상태</th>
-                <th className="px-3 py-2">길이</th>
-                <th className="px-3 py-2" />
-              </tr>
-            </thead>
-            <tbody>
-              {workerJobs.map((j) => (
-                <tr key={j.id} className="border-t border-line">
-                  <td className="px-3 py-2 text-muted">{j.workDate}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{j.videoId}</td>
-                  <td className="px-3 py-2 font-semibold text-brand">
-                    {j.skillScore ?? "—"}
-                  </td>
-                  <td className="px-3 py-2">
-                    <StatusBadge status={j.status} />
-                  </td>
-                  <td className="px-3 py-2 text-muted">
-                    {formatDuration(j.durationSec)}
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    {j.status === "completed" ? (
-                      <Link
-                        href={`/analysis/${j.videoId}/`}
-                        className="text-xs text-brand hover:underline"
-                      >
-                        결과
-                      </Link>
-                    ) : j.status === "failed" ? (
-                      <Link
-                        href="/work/failed/"
-                        className="text-xs text-danger hover:underline"
-                      >
-                        실패
-                      </Link>
-                    ) : (
-                      <Link
-                        href="/work/progress/"
-                        className="text-xs text-muted hover:underline"
-                      >
-                        진행
-                      </Link>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <section className="mt-6 space-y-3">
+        <div className="flex items-end justify-between gap-2">
+          <div>
+            <h2 className="text-sm font-semibold">숙련도 평가 세션</h2>
+            <p className="text-xs text-muted">
+              사람 × 평가 기술 × 일자 × 등록번호 단위 · 세션마다 영상·사진 복수
+            </p>
+          </div>
         </div>
+
+        {sessions.map((s) => {
+          const c = mediaCounts(s);
+          const videos = s.media.filter((m) => m.kind === "video");
+          const photos = s.media.filter((m) => m.kind !== "video");
+          const primaryVideo = videos.find((v) => v.videoId)?.videoId;
+          return (
+            <article
+              key={s.id}
+              className="rounded-xl border border-line bg-surface p-4"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="font-mono text-sm font-semibold text-brand">
+                    {s.regNo}
+                  </p>
+                  <p className="mt-0.5 text-sm font-medium">
+                    {s.skill} · {s.examDate}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted">
+                    {sessionStatusLabel[s.status]}
+                    {s.assignee ? ` · ${s.assignee}` : ""}
+                    {s.note ? ` · ${s.note}` : ""}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-semibold tabular-nums text-brand">
+                    {s.skillScore ?? "—"}
+                  </p>
+                  <p className="text-xs text-muted">
+                    {s.skillLevel ?? "미확정"} · 영상 {c.videos} · 사진{" "}
+                    {c.products}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                <div>
+                  <p className="mb-1 text-[11px] font-semibold text-muted">
+                    영상
+                  </p>
+                  <ul className="space-y-1 text-xs">
+                    {videos.map((v) => (
+                      <li
+                        key={v.id}
+                        className="flex items-center justify-between gap-2 rounded-md bg-bg px-2 py-1.5"
+                      >
+                        <span className="min-w-0 truncate">
+                          <span className="font-mono text-muted">
+                            {v.videoId ?? "—"}
+                          </span>{" "}
+                          {v.name}
+                          {v.durationSec != null
+                            ? ` · ${formatDuration(v.durationSec)}`
+                            : ""}
+                        </span>
+                        {v.videoId &&
+                        (v.videoId === "V-101" || v.videoId === "V-201") ? (
+                          <Link
+                            href={`/analysis/${v.videoId}/`}
+                            className="shrink-0 text-brand hover:underline"
+                          >
+                            분석
+                          </Link>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="mb-1 text-[11px] font-semibold text-muted">
+                    결과물 사진
+                  </p>
+                  {photos.length ? (
+                    <div className="flex flex-wrap gap-2">
+                      {photos.map((p) => (
+                        <div
+                          key={p.id}
+                          className="w-20 overflow-hidden rounded border border-line bg-bg"
+                        >
+                          {p.src ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={asset(p.src)}
+                              alt={p.name}
+                              className="aspect-square w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex aspect-square items-center justify-center text-[9px] text-muted">
+                              파일
+                            </div>
+                          )}
+                          <p className="truncate px-1 py-0.5 text-[9px] text-muted">
+                            {p.kind === "product_ref"
+                              ? "기준"
+                              : p.kind === "product_candidate"
+                                ? "결과"
+                                : "추가"}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted">사진 없음</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                {primaryVideo &&
+                (primaryVideo === "V-101" || primaryVideo === "V-201") ? (
+                  <Link
+                    href={`/evaluation/${primaryVideo}/`}
+                    className="text-brand hover:underline"
+                  >
+                    NCS 평가
+                  </Link>
+                ) : null}
+                <Link
+                  href="/register/product/"
+                  className="text-brand hover:underline"
+                >
+                  사진 추가
+                </Link>
+              </div>
+            </article>
+          );
+        })}
+
+        {!sessions.length ? (
+          <p className="rounded-xl border border-dashed border-line bg-surface py-10 text-center text-sm text-muted">
+            평가 세션이 없습니다.{" "}
+            <Link href="/register/" className="text-brand hover:underline">
+              등록하기
+            </Link>
+          </p>
+        ) : null}
       </section>
     </AppShell>
   );

@@ -67,6 +67,43 @@ export type Worker = {
 
 export type VideoKind = "skills_verification" | "experience";
 
+/** 한 번의 숙련도 평가(시험) 묶음 — 사람×기술×일자×등록번호 */
+export type SessionMediaKind =
+  | "video"
+  | "product_ref"
+  | "product_candidate"
+  | "product_other";
+
+export type SessionMedia = {
+  id: string;
+  kind: SessionMediaKind;
+  name: string;
+  /** 분석 파이프라인에 연결된 영상 ID */
+  videoId?: string;
+  src?: string;
+  durationSec?: number;
+};
+
+export type SessionStatus = "draft" | "in_progress" | "completed" | "failed";
+
+export type AssessmentSession = {
+  id: string;
+  /** 시험 등록번호 (예: SV-2026-0610-001) */
+  regNo: string;
+  workerId: string;
+  /** 이번 시험에서 평가하는 숙련 기술 */
+  skill: JobType;
+  examDate: string;
+  scenarioId?: string;
+  status: SessionStatus;
+  skillScore?: number | null;
+  skillLevel?: SkillLevel | null;
+  assignee?: string | null;
+  note?: string;
+  media: SessionMedia[];
+  jobIds: string[];
+};
+
 export type WorkJob = {
   id: string;
   workerId: string;
@@ -85,6 +122,8 @@ export type WorkJob = {
   /** 데이터 정의서: Skills Verification / Experience */
   videoKind?: VideoKind;
   scenarioId?: string;
+  /** 소속 숙련도 평가 세션 */
+  sessionId?: string;
 };
 
 export type PoseSample = {
@@ -330,6 +369,24 @@ export const jobs: WorkJob[] = [
     assignee: "평가자 A",
     videoKind: "skills_verification",
     scenarioId: SCENARIO_MOLD.id,
+    sessionId: "S-001",
+  },
+  {
+    id: "J-101B",
+    workerId: "W-001",
+    videoId: "V-101B",
+    jobType: "금형조립",
+    workDate: "2026-06-10",
+    videoName: "skills_verification_duc_01_angle2.mp4",
+    durationSec: 980,
+    fps: 30,
+    status: "completed",
+    progress: 100,
+    skillScore: 78,
+    assignee: "평가자 A",
+    videoKind: "skills_verification",
+    scenarioId: SCENARIO_MOLD.id,
+    sessionId: "S-001",
   },
   {
     id: "J-102",
@@ -344,6 +401,8 @@ export const jobs: WorkJob[] = [
     progress: 100,
     skillScore: 75,
     assignee: "평가자 A",
+    videoKind: "experience",
+    sessionId: "S-002",
   },
   {
     id: "J-103",
@@ -358,6 +417,8 @@ export const jobs: WorkJob[] = [
     progress: 100,
     skillScore: 72,
     assignee: "평가자 B",
+    videoKind: "skills_verification",
+    sessionId: "S-003",
   },
   {
     id: "J-201",
@@ -372,6 +433,8 @@ export const jobs: WorkJob[] = [
     progress: 100,
     skillScore: 86,
     assignee: "평가자 B",
+    videoKind: "skills_verification",
+    sessionId: "S-004",
   },
   {
     id: "J-301",
@@ -386,6 +449,7 @@ export const jobs: WorkJob[] = [
     progress: 45,
     skillScore: null,
     assignee: "운영 담당",
+    sessionId: "S-005",
   },
   {
     id: "J-401",
@@ -400,6 +464,7 @@ export const jobs: WorkJob[] = [
     progress: 5,
     skillScore: null,
     assignee: null,
+    sessionId: "S-006",
   },
   {
     id: "J-501",
@@ -416,6 +481,204 @@ export const jobs: WorkJob[] = [
     assignee: null,
     errorCode: "POSE_LOW_COVERAGE",
     errorMessage: "유효 포즈 프레임 비율 42% — 재촬영 또는 재실행 필요",
+    sessionId: "S-007",
+  },
+];
+
+export const assessmentSessions: AssessmentSession[] = [
+  {
+    id: "S-001",
+    regNo: "SV-2026-0610-001",
+    workerId: "W-001",
+    skill: "금형조립",
+    examDate: "2026-06-10",
+    scenarioId: SCENARIO_MOLD.id,
+    status: "completed",
+    skillScore: 78,
+    skillLevel: "중급",
+    assignee: "평가자 A",
+    note: "기량검증 · 영상 2건 + 결과물 사진 다건",
+    jobIds: ["J-101", "J-101B"],
+    media: [
+      {
+        id: "m-v101",
+        kind: "video",
+        name: "skills_verification_duc_01.mp4",
+        videoId: "V-101",
+        durationSec: 2668,
+      },
+      {
+        id: "m-v101b",
+        kind: "video",
+        name: "skills_verification_duc_01_angle2.mp4",
+        videoId: "V-101B",
+        durationSec: 980,
+      },
+      {
+        id: "m-ref1",
+        kind: "product_ref",
+        name: "product-reference.png",
+        src: "/evidence/products/product-reference.png",
+      },
+      {
+        id: "m-cand1",
+        kind: "product_candidate",
+        name: "product-candidate.png",
+        src: "/evidence/products/product-candidate.png",
+      },
+      {
+        id: "m-oth1",
+        kind: "product_other",
+        name: "product-fail-align.png",
+        src: "/evidence/products/product-fail-align.png",
+      },
+      {
+        id: "m-oth2",
+        kind: "product_other",
+        name: "product-fail-surface.png",
+        src: "/evidence/products/product-fail-surface.png",
+      },
+    ],
+  },
+  {
+    id: "S-002",
+    regNo: "SV-2026-0511-001",
+    workerId: "W-001",
+    skill: "금형조립",
+    examDate: "2026-05-11",
+    status: "completed",
+    skillScore: 75,
+    skillLevel: "중급",
+    assignee: "평가자 A",
+    note: "경험 영상 재평가",
+    jobIds: ["J-102"],
+    media: [
+      {
+        id: "m-v102",
+        kind: "video",
+        name: "experience_duc_02.mp4",
+        videoId: "V-102",
+        durationSec: 3389,
+      },
+      {
+        id: "m-cand2",
+        kind: "product_candidate",
+        name: "product-pass-01.png",
+        src: "/evidence/products/product-pass-01.png",
+      },
+    ],
+  },
+  {
+    id: "S-003",
+    regNo: "SV-2026-0422-001",
+    workerId: "W-001",
+    skill: "금형조립",
+    examDate: "2026-04-22",
+    status: "completed",
+    skillScore: 72,
+    skillLevel: "중급",
+    assignee: "평가자 B",
+    jobIds: ["J-103"],
+    media: [
+      {
+        id: "m-v103",
+        kind: "video",
+        name: "skills_verification_duc_00.mp4",
+        videoId: "V-103",
+        durationSec: 2100,
+      },
+    ],
+  },
+  {
+    id: "S-004",
+    regNo: "SV-2026-0612-001",
+    workerId: "W-002",
+    skill: "기계가공",
+    examDate: "2026-06-12",
+    status: "completed",
+    skillScore: 86,
+    skillLevel: "고급",
+    assignee: "평가자 B",
+    jobIds: ["J-201"],
+    media: [
+      {
+        id: "m-v201",
+        kind: "video",
+        name: "machining_akmal_01.mp4",
+        videoId: "V-201",
+        durationSec: 1840,
+      },
+      {
+        id: "m-ref201",
+        kind: "product_ref",
+        name: "product-reference.png",
+        src: "/evidence/products/product-reference.png",
+      },
+      {
+        id: "m-cand201",
+        kind: "product_candidate",
+        name: "product-pass-02.png",
+        src: "/evidence/products/product-pass-02.png",
+      },
+    ],
+  },
+  {
+    id: "S-005",
+    regNo: "SV-2026-0614-001",
+    workerId: "W-003",
+    skill: "용접",
+    examDate: "2026-06-14",
+    status: "in_progress",
+    skillScore: null,
+    assignee: "운영 담당",
+    jobIds: ["J-301"],
+    media: [
+      {
+        id: "m-v301",
+        kind: "video",
+        name: "welding_hung_01.mp4",
+        videoId: "V-301",
+        durationSec: 920,
+      },
+    ],
+  },
+  {
+    id: "S-006",
+    regNo: "SV-2026-0615-001",
+    workerId: "W-004",
+    skill: "프레스",
+    examDate: "2026-06-15",
+    status: "in_progress",
+    jobIds: ["J-401"],
+    media: [
+      {
+        id: "m-v401",
+        kind: "video",
+        name: "press_bishal_01.mp4",
+        videoId: "V-401",
+        durationSec: 640,
+      },
+    ],
+  },
+  {
+    id: "S-007",
+    regNo: "SV-2026-0508-001",
+    workerId: "W-005",
+    skill: "사출",
+    examDate: "2026-05-08",
+    status: "failed",
+    assignee: null,
+    note: "POSE_LOW_COVERAGE",
+    jobIds: ["J-501"],
+    media: [
+      {
+        id: "m-v501",
+        kind: "video",
+        name: "injection_somchai_01.mp4",
+        videoId: "V-501",
+        durationSec: 1510,
+      },
+    ],
   },
 ];
 
@@ -1062,6 +1325,39 @@ export function getJob(videoId: string) {
 
 export function getAnalysis(videoId: string) {
   return analyses[videoId];
+}
+
+export function getSession(id: string) {
+  return assessmentSessions.find((s) => s.id === id);
+}
+
+export function getSessionByRegNo(regNo: string) {
+  return assessmentSessions.find((s) => s.regNo === regNo);
+}
+
+export function getSessionsByWorker(workerId: string) {
+  return assessmentSessions
+    .filter((s) => s.workerId === workerId)
+    .slice()
+    .sort((a, b) => b.examDate.localeCompare(a.examDate));
+}
+
+export function getJobsBySession(sessionId: string) {
+  return jobs.filter((j) => j.sessionId === sessionId);
+}
+
+export function mediaCounts(session: AssessmentSession) {
+  const videos = session.media.filter((m) => m.kind === "video").length;
+  const products = session.media.filter((m) => m.kind !== "video").length;
+  return { videos, products };
+}
+
+export function suggestRegNo(examDate: string, workerId: string) {
+  const compact = examDate.replaceAll("-", "");
+  const seq = String(
+    assessmentSessions.filter((s) => s.examDate === examDate).length + 1,
+  ).padStart(3, "0");
+  return `SV-${compact.slice(0, 4)}-${compact.slice(4, 8)}-${workerId.replace("W-", "")}${seq}`;
 }
 
 export const opsSummary = {

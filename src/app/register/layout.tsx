@@ -9,7 +9,7 @@ export default function RegisterLayout({
   return (
     <AppShell
       title="등록"
-      subtitle="기술자 프로필에 영상·조형물·라벨을 묶어 등록"
+      subtitle="사람 × 평가기술 × 일자 × 등록번호 · 영상·사진 복수 첨부"
     >
       <SectionTabs tabs={registerTabs} />
       {children}

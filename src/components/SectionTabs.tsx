@@ -62,12 +62,12 @@ export const workTabs: SectionTab[] = [
 export const registerTabs: SectionTab[] = [
   {
     href: "/register/",
-    label: "영상·정보",
+    label: "평가 세션",
     match: (p) => p === "/register",
   },
   {
     href: "/register/product/",
-    label: "조형물 이미지",
+    label: "세션에 사진 추가",
     match: (p) => p === "/register/product",
   },
 ];
