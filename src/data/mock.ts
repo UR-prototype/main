@@ -1,5 +1,11 @@
 import poseSamplesV101 from "./_poseSamples_V-101.json";
 import poseSamplesV201 from "./_poseSamples_V-201.json";
+import type {
+  NcsEventSeg,
+  NcsRubricScore,
+  NcsStageSeg,
+} from "@/data/ncs";
+import { NCS_MOLD_ASSY, NCS_SAFETY, SCENARIO_MOLD } from "@/data/ncs";
 
 export type PipelineStatus =
   | "uploaded"
@@ -59,6 +65,8 @@ export type Worker = {
   scoreHistory: { month: string; score: number }[];
 };
 
+export type VideoKind = "skills_verification" | "experience";
+
 export type WorkJob = {
   id: string;
   workerId: string;
@@ -74,6 +82,9 @@ export type WorkJob = {
   assignee?: string | null;
   errorCode?: string | null;
   errorMessage?: string | null;
+  /** 데이터 정의서: Skills Verification / Experience */
+  videoKind?: VideoKind;
+  scenarioId?: string;
 };
 
 export type PoseSample = {
@@ -177,6 +188,12 @@ export type AnalysisResult = {
   framesExtracted: number;
   posePoints: number;
   processedAt: string;
+  /** NCS 코퍼스 계층 (데이터 정의서 1 Record = 1 Video) */
+  ncsUnits?: string[];
+  scenarioId?: string;
+  ncsStages?: NcsStageSeg[];
+  ncsEvents?: NcsEventSeg[];
+  ncsRubric?: NcsRubricScore[];
 };
 
 export const assignees = [
@@ -311,6 +328,8 @@ export const jobs: WorkJob[] = [
     progress: 100,
     skillScore: 78,
     assignee: "평가자 A",
+    videoKind: "skills_verification",
+    scenarioId: SCENARIO_MOLD.id,
   },
   {
     id: "J-102",
@@ -705,11 +724,116 @@ export const analyses: Record<string, AnalysisResult> = {
     reviewStatus: "승인",
     poseSamples: poseSamplesV101 as PoseSample[],
     timeSegments: [
-      { start: 0, end: 40, type: "work", label: "부품 정렬" },
-      { start: 40, end: 55, type: "idle", label: "정지" },
-      { start: 55, end: 110, type: "work", label: "조립 반복" },
-      { start: 110, end: 125, type: "anomaly", label: "불안정 파지" },
-      { start: 125, end: 180, type: "work", label: "마무리 점검" },
+      { start: 0, end: 48, type: "work", label: "STAGE_PREP" },
+      { start: 48, end: 135, type: "work", label: "STAGE_FIXED_ASSY" },
+      { start: 135, end: 220, type: "work", label: "STAGE_MOVING_ASSY" },
+      { start: 220, end: 310, type: "work", label: "STAGE_CONFIRM" },
+      { start: 310, end: 347, type: "work", label: "STAGE_CLOSE" },
+    ],
+    ncsUnits: [NCS_MOLD_ASSY.code, NCS_SAFETY.code],
+    scenarioId: SCENARIO_MOLD.id,
+    ncsStages: [
+      {
+        id: "ns1",
+        stageId: "STAGE_PREP",
+        start: 0,
+        end: 48,
+        note: "부품·공구 배치",
+      },
+      {
+        id: "ns2",
+        stageId: "STAGE_FIXED_ASSY",
+        start: 48,
+        end: 135,
+        note: "고정측 정렬·체결 (Idle 포함)",
+      },
+      {
+        id: "ns3",
+        stageId: "STAGE_MOVING_ASSY",
+        start: 135,
+        end: 220,
+        note: "가동측 조립",
+      },
+      {
+        id: "ns4",
+        stageId: "STAGE_CONFIRM",
+        start: 220,
+        end: 310,
+        note: "맞춤·체결 확인",
+      },
+      {
+        id: "ns5",
+        stageId: "STAGE_CLOSE",
+        start: 310,
+        end: 347,
+        note: "정리",
+      },
+    ],
+    ncsEvents: [
+      {
+        id: "ne1",
+        type: "EVENT_IDLE",
+        start: 42,
+        end: 55,
+        stageId: "STAGE_FIXED_ASSY",
+        polarity: "negative_candidate",
+        note: "저움직임 지속 → idle_time Feature · 속도 −8",
+        ncsHint: "E2",
+      },
+      {
+        id: "ne2",
+        type: "EVENT_WRONG_SEQUENCE",
+        start: 72,
+        end: 88,
+        stageId: "STAGE_FIXED_ASSY",
+        polarity: "negative_candidate",
+        note: "체결 전 확인 생략 · E2 미달 후보",
+        ncsHint: "E2",
+      },
+      {
+        id: "ne3",
+        type: "EVENT_TOOL_SWITCH",
+        start: 108,
+        end: 118,
+        stageId: "STAGE_FIXED_ASSY",
+        polarity: "neutral",
+        note: "공구 교체 구간 (정상 동선 참고)",
+      },
+      {
+        id: "ne4",
+        type: "EVENT_EXCESSIVE_REACH",
+        start: 118,
+        end: 125,
+        stageId: "STAGE_FIXED_ASSY",
+        polarity: "negative_candidate",
+        note: "손 이동량 과다 → 안정성 −5",
+        ncsHint: "E2",
+      },
+      {
+        id: "ne5",
+        type: "EVENT_REGRASP",
+        start: 185,
+        end: 202,
+        stageId: "STAGE_MOVING_ASSY",
+        polarity: "negative_candidate",
+        note: "비효율 재파지 · E3 참고",
+        ncsHint: "E3",
+      },
+    ],
+    ncsRubric: [
+      { element: "E1", score: 4, evidence: "PREP 48초 · Drop 없음" },
+      {
+        element: "E2",
+        score: 3,
+        evidence: "Idle·순서오류·Reach 관측 · 체결은 완료",
+      },
+      { element: "E3", score: 3, evidence: "재파지 1회 · 조립 완료" },
+      {
+        element: "E4",
+        score: 3,
+        evidence: "CONFIRM 수행 · 결과물 조건부합격",
+      },
+      { element: "SAFE", score: 4, evidence: "SAFETY 이벤트 없음" },
     ],
     framesExtracted: 8004,
     posePoints: 132088,

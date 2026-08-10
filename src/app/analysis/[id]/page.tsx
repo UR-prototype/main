@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AnalysisTabs } from "@/components/AnalysisTabs";
 import { AppShell } from "@/components/AppShell";
+import { EvidenceChain } from "@/components/EvidenceChain";
 import { EvidenceGallery } from "@/components/EvidenceGallery";
 import { ExplainCard } from "@/components/ExplainCard";
 import { FrameRail } from "@/components/FrameRail";
@@ -13,6 +14,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { StudioMetaBar } from "@/components/StudioMetaBar";
 import { TimelineScrubber } from "@/components/TimelineScrubber";
 import { getAnalysis, getJob, getWorker, jobs } from "@/data/mock";
+import { NCS_MOLD_ASSY, SCENARIO_MOLD, stageMeta } from "@/data/ncs";
 
 export function generateStaticParams() {
   return jobs.map((j) => ({ id: j.videoId }));
@@ -72,6 +74,30 @@ export default async function AnalysisOverviewPage({
         frames={analysis?.framesExtracted}
       />
 
+      {analysis?.ncsStages?.length ? (
+        <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-line bg-surface px-3 py-2 text-[11px]">
+          <span className="font-medium text-ink">
+            {analysis.scenarioId ?? SCENARIO_MOLD.id}
+          </span>
+          <span className="text-muted">
+            {(analysis.ncsUnits ?? [NCS_MOLD_ASSY.code]).join(" · ")}
+          </span>
+          <span className="hidden h-3 w-px bg-line sm:block" />
+          {analysis.ncsStages.map((s) => {
+            const m = stageMeta(s.stageId);
+            return (
+              <span key={s.id} className="inline-flex items-center gap-1">
+                <i
+                  className="inline-block h-2 w-2 rounded-sm"
+                  style={{ background: m.color }}
+                />
+                {m.element} {m.name}
+              </span>
+            );
+          })}
+        </div>
+      ) : null}
+
       {job.status !== "completed" ? (
         <section className="mb-5 rounded-xl border border-line bg-surface p-4">
           <PipelineProgress
@@ -98,6 +124,7 @@ export default async function AnalysisOverviewPage({
       ) : (
         <div className="space-y-5">
           <ExplainCard result={analysis} />
+          <EvidenceChain result={analysis} videoId={id} />
 
           <div className="grid gap-5 xl:grid-cols-5">
             <div className="space-y-5 xl:col-span-3">

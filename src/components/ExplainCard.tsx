@@ -1,4 +1,5 @@
 import type { AnalysisResult } from "@/data/mock";
+import { NCS_MOLD_ASSY, SCENARIO_MOLD } from "@/data/ncs";
 
 export function ExplainCard({ result }: { result: AnalysisResult }) {
   const strengths = [
@@ -8,13 +9,22 @@ export function ExplainCard({ result }: { result: AnalysisResult }) {
     result.productJudgment.overall === "합격" ? "결과물 품질 합격" : null,
   ].filter(Boolean) as string[];
 
+  const scenario = result.scenarioId ?? SCENARIO_MOLD.id;
+  const units = result.ncsUnits?.join(" · ") ?? NCS_MOLD_ASSY.code;
+
   return (
     <section className="rounded-xl border border-line bg-surface p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-medium text-muted">AI 요약</p>
+          <p className="text-xs font-medium text-muted">규칙 엔진 요약</p>
           <p className="mt-1 text-sm text-muted">
             {result.matching.recommendedJob}
+          </p>
+          <p className="mt-2 text-[11px] text-muted">
+            {scenario} · {units}
+          </p>
+          <p className="mt-1 max-w-xl text-xs leading-relaxed text-muted">
+            {result.summary}
           </p>
         </div>
         <div className="text-right">
@@ -22,10 +32,13 @@ export function ExplainCard({ result }: { result: AnalysisResult }) {
             {result.skillScore}
           </p>
           <p className="text-sm text-muted">{result.skillLevel}</p>
+          <p className="mt-1 text-[10px] text-muted">
+            0.30속도+0.25안정+0.20반복+0.25정확
+          </p>
         </div>
       </div>
 
-      <div className="mt-4 grid gap-4 border-t border-line pt-4 sm:grid-cols-3">
+      <div className="mt-4 grid gap-4 border-t border-line pt-4 sm:grid-cols-4">
         <div>
           <p className="text-xs font-medium text-muted">강점</p>
           <ul className="mt-1.5 space-y-1 text-sm">
@@ -42,6 +55,15 @@ export function ExplainCard({ result }: { result: AnalysisResult }) {
             {result.improvements.slice(0, 3).map((i) => (
               <li key={i}>{i}</li>
             ))}
+          </ul>
+        </div>
+        <div>
+          <p className="text-xs font-medium text-muted">Feature</p>
+          <ul className="mt-1.5 space-y-0.5 font-mono text-[11px] text-muted">
+            <li>idle {result.features.idle_time}s</li>
+            <li>travel {result.features.hand_travel}</li>
+            <li>cycle {result.features.cycle_count}</li>
+            <li>switch {result.features.tool_switch_count}</li>
           </ul>
         </div>
         <div>

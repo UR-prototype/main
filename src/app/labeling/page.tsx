@@ -14,6 +14,16 @@ import {
   Volume2,
 } from "lucide-react";
 import { analyses, getWorker, jobs } from "@/data/mock";
+import {
+  NCS_MOLD_ASSY,
+  NCS_STAGES,
+  NCS_EVENTS,
+  SCENARIO_MOLD,
+  eventMeta,
+  stageMeta,
+  type NcsEventType,
+  type NcsStageId,
+} from "@/data/ncs";
 import { asset } from "@/lib/asset";
 
 type StudioTab = "video" | "stage" | "anomaly";
@@ -21,6 +31,7 @@ type IntervalKind = "stage" | "anomaly";
 
 type StageSeg = {
   id: string;
+  stageId: NcsStageId;
   name: string;
   start: number;
   end: number;
@@ -30,20 +41,12 @@ type StageSeg = {
 
 type AnomalySeg = {
   id: string;
+  type: NcsEventType;
   name: string;
   start: number;
   end: number;
   note: string;
 };
-
-const STAGE_COLORS = [
-  "#3b82f6",
-  "#10b981",
-  "#8b5cf6",
-  "#0d9488",
-  "#64748b",
-  "#f59e0b",
-];
 
 function fmt(t: number) {
   const h = Math.floor(t / 3600);
@@ -93,77 +96,61 @@ export default function TimelineLabelingPage() {
   const [speed, setSpeed] = useState(1);
   const [savedFlash, setSavedFlash] = useState(false);
 
-  const [stages, setStages] = useState<StageSeg[]>([
-    {
-      id: "st1",
-      name: "부품 준비",
-      start: 0,
-      end: 48,
-      color: STAGE_COLORS[0]!,
-      note: "자재·공구 배치",
-    },
-    {
-      id: "st2",
-      name: "부품 조립",
-      start: 48,
-      end: 135,
-      color: STAGE_COLORS[1]!,
-      note: "본조립 구간",
-    },
-    {
-      id: "st3",
-      name: "체결·고정",
-      start: 135,
-      end: 220,
-      color: STAGE_COLORS[2]!,
-      note: "볼트·클램프 체결",
-    },
-    {
-      id: "st4",
-      name: "검사·확인",
-      start: 220,
-      end: 310,
-      color: STAGE_COLORS[3]!,
-      note: "치수·외관 점검",
-    },
-    {
-      id: "st5",
-      name: "정리",
-      start: 310,
-      end: 347,
-      color: STAGE_COLORS[4]!,
-      note: "작업장 정리",
-    },
-  ]);
+  const [stages, setStages] = useState<StageSeg[]>(() => {
+    const fromMock = analyses["V-101"]?.ncsStages;
+    if (fromMock?.length) {
+      return fromMock.map((s) => {
+        const m = stageMeta(s.stageId);
+        return {
+          id: s.id,
+          stageId: s.stageId,
+          name: m.name,
+          start: s.start,
+          end: s.end,
+          color: m.color,
+          note: s.note ?? m.hint,
+        };
+      });
+    }
+    return NCS_STAGES.map((m, i) => ({
+      id: `st${i + 1}`,
+      stageId: m.id,
+      name: m.name,
+      start: i * 60,
+      end: Math.min(347, (i + 1) * 60 + 20),
+      color: m.color,
+      note: m.hint,
+    }));
+  });
 
-  const [anomalies, setAnomalies] = useState<AnomalySeg[]>([
-    {
-      id: "an1",
-      name: "작업순서 오류",
-      start: 72,
-      end: 88,
-      note: "체결 전 검사 생략 (AI 제안)",
-    },
-    {
-      id: "an2",
-      name: "부적절한 자세",
-      start: 185,
-      end: 202,
-      note: "허리 굽힘 지속 · 자세 경고",
-    },
-  ]);
+  const [anomalies, setAnomalies] = useState<AnomalySeg[]>(() => {
+    const fromMock = analyses["V-101"]?.ncsEvents;
+    if (fromMock?.length) {
+      return fromMock.map((e) => ({
+        id: e.id,
+        type: e.type,
+        name: eventMeta(e.type).name,
+        start: e.start,
+        end: e.end,
+        note: e.note,
+      }));
+    }
+    return [];
+  });
 
   const [selected, setSelected] = useState<{
     kind: IntervalKind;
     id: string;
-  } | null>({ kind: "anomaly", id: "an1" });
+  } | null>({ kind: "anomaly", id: "ne2" });
 
   const [draft, setDraft] = useState({
     kind: "anomaly" as IntervalKind,
     name: "작업순서 오류",
+    stageId: "STAGE_FIXED_ASSY" as NcsStageId,
+    eventType: "EVENT_WRONG_SEQUENCE" as NcsEventType,
     start: 72,
     end: 88,
-    note: "체결 전 검사 생략 (AI 제안)",
+    note: "체결 전 확인 생략 · E2 미달 후보",
   });
 
   const jobIndex = completed.findIndex((j) => j.videoId === videoId);
@@ -216,6 +203,8 @@ export default function TimelineLabelingPage() {
     setDraft({
       kind: "stage",
       name: s.name,
+      stageId: s.stageId,
+      eventType: "EVENT_IDLE",
       start: s.start,
       end: s.end,
       note: s.note,
@@ -229,6 +218,8 @@ export default function TimelineLabelingPage() {
     setDraft({
       kind: "anomaly",
       name: a.name,
+      stageId: "STAGE_FIXED_ASSY",
+      eventType: a.type,
       start: a.start,
       end: a.end,
       note: a.note,
@@ -245,11 +236,20 @@ export default function TimelineLabelingPage() {
       return;
     }
     if (draft.kind === "stage") {
+      const meta = stageMeta(draft.stageId);
       if (selected?.kind === "stage") {
         setStages((prev) =>
           prev.map((s) =>
             s.id === selected.id
-              ? { ...s, name: draft.name, start, end, note: draft.note }
+              ? {
+                  ...s,
+                  stageId: draft.stageId,
+                  name: meta.name,
+                  start,
+                  end,
+                  color: meta.color,
+                  note: draft.note,
+                }
               : s,
           ),
         );
@@ -259,36 +259,48 @@ export default function TimelineLabelingPage() {
           ...prev,
           {
             id,
-            name: draft.name || "새 단계",
+            stageId: draft.stageId,
+            name: meta.name,
             start,
             end,
-            color: STAGE_COLORS[prev.length % STAGE_COLORS.length]!,
+            color: meta.color,
             note: draft.note,
           },
         ]);
         setSelected({ kind: "stage", id });
       }
-    } else if (selected?.kind === "anomaly") {
-      setAnomalies((prev) =>
-        prev.map((a) =>
-          a.id === selected.id
-            ? { ...a, name: draft.name, start, end, note: draft.note }
-            : a,
-        ),
-      );
     } else {
-      const id = `an-${Date.now()}`;
-      setAnomalies((prev) => [
-        ...prev,
-        {
-          id,
-          name: draft.name || "이상행동",
-          start,
-          end,
-          note: draft.note,
-        },
-      ]);
-      setSelected({ kind: "anomaly", id });
+      const meta = eventMeta(draft.eventType);
+      if (selected?.kind === "anomaly") {
+        setAnomalies((prev) =>
+          prev.map((a) =>
+            a.id === selected.id
+              ? {
+                  ...a,
+                  type: draft.eventType,
+                  name: meta.name,
+                  start,
+                  end,
+                  note: draft.note,
+                }
+              : a,
+          ),
+        );
+      } else {
+        const id = `an-${Date.now()}`;
+        setAnomalies((prev) => [
+          ...prev,
+          {
+            id,
+            type: draft.eventType,
+            name: meta.name,
+            start,
+            end,
+            note: draft.note,
+          },
+        ]);
+        setSelected({ kind: "anomaly", id });
+      }
     }
   }
 
@@ -306,12 +318,19 @@ export default function TimelineLabelingPage() {
     const last = stages[stages.length - 1];
     const start = last ? Math.min(duration - 20, last.end) : t;
     const end = Math.min(duration, start + 30);
+    const unused = NCS_STAGES.find(
+      (m) => !stages.some((s) => s.stageId === m.id),
+    );
+    const stageId = unused?.id ?? "STAGE_CONFIRM";
+    const meta = stageMeta(stageId);
     setDraft({
       kind: "stage",
-      name: `단계 ${stages.length + 1}`,
+      name: meta.name,
+      stageId,
+      eventType: "EVENT_IDLE",
       start,
       end,
-      note: "",
+      note: meta.hint,
     });
     setSelected(null);
     setTab("stage");
@@ -320,7 +339,9 @@ export default function TimelineLabelingPage() {
   function addAnomaly() {
     setDraft({
       kind: "anomaly",
-      name: "이상행동",
+      name: eventMeta("EVENT_IDLE").name,
+      stageId: "STAGE_FIXED_ASSY",
+      eventType: "EVENT_IDLE",
       start: Math.max(0, t - 5),
       end: Math.min(duration, t + 10),
       note: "",
@@ -354,9 +375,17 @@ export default function TimelineLabelingPage() {
           value={`${worker?.name ?? job.workerId} [${job.workerId}]`}
         />
         <Sep />
-        <Meta label="작업" value={`${job.jobType} / 조립 작업`} />
+        <Meta
+          label="작업"
+          value={`${job.jobType} · ${job.videoKind === "experience" ? "Experience" : "Skills Verification"}`}
+        />
         <Sep />
-        <Meta label="시나리오" value="시나리오 A · 기본 조립" />
+        <Meta
+          label="시나리오"
+          value={job.scenarioId ?? SCENARIO_MOLD.id}
+        />
+        <Sep />
+        <Meta label="NCS" value={NCS_MOLD_ASSY.code} />
         <Sep />
         <label className="inline-flex items-center gap-1.5">
           <span className="text-muted">영상</span>
@@ -566,7 +595,7 @@ export default function TimelineLabelingPage() {
             }`}
           >
             <div className="mb-2 flex items-center justify-between gap-2">
-              <h2 className="text-xs font-semibold">작업 단계 목록</h2>
+              <h2 className="text-xs font-semibold">작업 단계 · NCS Stage</h2>
               <button
                 type="button"
                 onClick={addStage}
@@ -595,9 +624,11 @@ export default function TimelineLabelingPage() {
                       {i + 1}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate font-medium">{s.name}</span>
+                      <span className="block truncate font-medium">
+                        {stageMeta(s.stageId).element} · {s.name}
+                      </span>
                       <span className="font-mono text-[10px] text-muted">
-                        {fmt(s.start)}–{fmt(s.end)}
+                        {s.stageId} · {fmt(s.start)}–{fmt(s.end)}
                       </span>
                     </span>
                     <Pencil size={12} className="shrink-0 text-muted" />
@@ -614,8 +645,8 @@ export default function TimelineLabelingPage() {
                 : "border-line"
             }`}
           >
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <h2 className="text-xs font-semibold">이상행동 목록</h2>
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-xs font-semibold">이상행동 · Event 목록</h2>
               <button
                 type="button"
                 onClick={addAnomaly}
@@ -644,7 +675,7 @@ export default function TimelineLabelingPage() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium">{a.name}</span>
                       <span className="font-mono text-[10px] text-muted">
-                        {fmt(a.start)}–{fmt(a.end)}
+                        {a.type} · {fmt(a.start)}–{fmt(a.end)}
                       </span>
                       <span className="mt-0.5 block truncate text-[10px] text-muted">
                         {a.note}
@@ -815,18 +846,55 @@ export default function TimelineLabelingPage() {
             ))}
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
-            <label className="block text-xs sm:col-span-2">
-              <span className="mb-1 block text-muted">이름</span>
-              <input
-                value={draft.name}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, name: e.target.value }))
-                }
-                className="w-full rounded-md border border-line bg-bg px-2 py-1.5"
-              />
-            </label>
+            {draft.kind === "stage" ? (
+              <label className="block text-xs sm:col-span-2">
+                <span className="mb-1 block text-muted">NCS Stage</span>
+                <select
+                  value={draft.stageId}
+                  onChange={(e) => {
+                    const stageId = e.target.value as NcsStageId;
+                    const m = stageMeta(stageId);
+                    setDraft((d) => ({
+                      ...d,
+                      stageId,
+                      name: m.name,
+                      note: d.note || m.hint,
+                    }));
+                  }}
+                  className="w-full rounded-md border border-line bg-bg px-2 py-1.5"
+                >
+                  {NCS_STAGES.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.element} · {s.name} ({s.id})
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : (
+              <label className="block text-xs sm:col-span-2">
+                <span className="mb-1 block text-muted">Event 유형</span>
+                <select
+                  value={draft.eventType}
+                  onChange={(e) => {
+                    const eventType = e.target.value as NcsEventType;
+                    setDraft((d) => ({
+                      ...d,
+                      eventType,
+                      name: eventMeta(eventType).name,
+                    }));
+                  }}
+                  className="w-full rounded-md border border-line bg-bg px-2 py-1.5"
+                >
+                  {NCS_EVENTS.map((e) => (
+                    <option key={e.type} value={e.type}>
+                      {e.name} ({e.type})
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             <label className="block text-xs">
-              <span className="mb-1 block text-muted">시작</span>
+              <span className="mb-1 block text-muted">시작(초)</span>
               <input
                 type="number"
                 min={0}
@@ -839,7 +907,7 @@ export default function TimelineLabelingPage() {
               />
             </label>
             <label className="block text-xs">
-              <span className="mb-1 block text-muted">종료</span>
+              <span className="mb-1 block text-muted">종료(초)</span>
               <input
                 type="number"
                 min={0}
@@ -856,6 +924,11 @@ export default function TimelineLabelingPage() {
               <span className="font-mono text-ink">
                 {fmt(Math.abs(draft.end - draft.start))}
               </span>
+              {draft.kind === "anomaly" ? (
+                <span className="ml-2">
+                  · {eventMeta(draft.eventType).role}
+                </span>
+              ) : null}
             </p>
             <label className="block text-xs sm:col-span-2">
               <span className="mb-1 block text-muted">설명</span>
