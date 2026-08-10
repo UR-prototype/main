@@ -15,13 +15,15 @@ export default function EvaluationListPage() {
   return (
     <AppShell
       title="숙련도 평가"
-      subtitle="평가 세션 단위 · NCS·전문가 확정 (영상 1건 ≠ 평가 1건)"
+      subtitle="NCS 능력단위 기준 · 세션(등록번호) 단위 전문가 확정"
     >
       <p className="mb-4 text-sm text-muted">
-        숙련도 판정은{" "}
-        <b className="font-medium text-ink">등록번호(세션)</b> 기준입니다. 세션에
-        영상·결과물 사진이 여러 개여도 NCS 평가는 한 번입니다. AI 점수는 참고
-        근거입니다.
+        숙련도는{" "}
+        <b className="font-medium text-ink">NCS(단순 사출금형 조립 · 안전규정준수)</b>{" "}
+        루브릭으로 보며, 판정 단위는{" "}
+        <b className="font-medium text-ink">평가 세션 1건</b>입니다. 영상·사진
+        여러 개도 같은 시험 근거이고, AI 점수는 참고입니다. 상세 재생·근거는 각
+        세션의 AI 분석·라벨링에서 확인합니다.
       </p>
 
       <div className="overflow-hidden rounded-xl border border-line bg-surface">

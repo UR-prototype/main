@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { FrameRail } from "@/components/FrameRail";
 import {
   getAnalysis,
   getJobsBySession,
@@ -17,12 +18,21 @@ import {
   NCS_MOLD_ASSY,
   NCS_RUBRIC_ITEMS,
   NCS_SAFETY,
+  NCS_STAGES,
   SCENARIO_MOLD,
   eventMeta,
   stageMeta,
   type NcsElementId,
 } from "@/data/ncs";
 import { formatDuration } from "@/lib/status";
+
+function stageHintLabel(hint: string) {
+  const stage = NCS_STAGES.find((s) => s.id === hint || hint.includes(s.id));
+  if (stage) return stage.name;
+  if (hint.includes("PRODUCT")) return "확인 단계 · 결과물";
+  if (hint.includes("SAFETY") || hint.includes("CLOSE")) return "안전·마무리";
+  return hint;
+}
 
 export default function EvaluationClient() {
   const { id } = useParams<{ id: string }>();
@@ -77,13 +87,17 @@ export default function EvaluationClient() {
   const counts = mediaCounts(session);
   const videos = session.media.filter((m) => m.kind === "video");
   const photos = session.media.filter((m) => m.kind !== "video");
+  const scenarioTitle =
+    session.scenarioId === SCENARIO_MOLD.id || !session.scenarioId
+      ? SCENARIO_MOLD.title
+      : session.scenarioId;
 
   const relatedEvents = (element: NcsElementId) =>
     (primaryAnalysis?.ncsEvents ?? []).filter((e) => e.ncsHint === element);
 
   return (
     <AppShell
-      title="NCS · 세션 평가"
+      title="숙련도 평가"
       subtitle={`${session.regNo} · ${worker?.name ?? session.workerId} · ${session.skill} · ${session.examDate}`}
       actions={
         <div className="flex flex-wrap gap-2">
@@ -92,15 +106,17 @@ export default function EvaluationClient() {
               href={`/analysis/${primaryVideoId}/`}
               className="rounded-lg border border-line px-3 py-2 text-sm"
             >
-              대표 분석
+              AI 분석 상세
             </Link>
           ) : null}
-          <Link
-            href={`/workers/${session.workerId}/`}
-            className="rounded-lg border border-line px-3 py-2 text-sm"
-          >
-            기술자
-          </Link>
+          {primaryVideoId ? (
+            <Link
+              href={`/labeling/?session=${session.id}&video=${primaryVideoId}`}
+              className="rounded-lg border border-line px-3 py-2 text-sm"
+            >
+              타임라인 라벨
+            </Link>
+          ) : null}
           <Link
             href="/evaluation/"
             className="rounded-lg border border-line px-3 py-2 text-sm"
@@ -110,50 +126,108 @@ export default function EvaluationClient() {
         </div>
       }
     >
-      <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-        <p>
-          이 화면은 <b>영상 1건이 아니라 평가 세션 1건</b>에 대한 NCS·전문가
-          확정입니다. 세션 미디어(영상 {counts.videos} · 사진 {counts.products})
-          전체가 동일 시험의 근거입니다.
+      <div className="mb-4 rounded-xl border border-line bg-surface px-4 py-3 text-sm">
+        <p className="font-medium text-ink">무엇을 평가하나요?</p>
+        <p className="mt-1 text-muted">
+          이 화면은{" "}
+          <b className="font-medium text-ink">NCS 능력단위</b>를 기준으로,
+          전문가가 세션 전체 근거를 보고 숙련도를{" "}
+          <b className="font-medium text-ink">최종 확정</b>하는 곳입니다. AI
+          점수·Stage/Event는 자동 판정이 아니라 참고 근거입니다.
         </p>
-        <p className="mt-1 text-xs">
-          {session.scenarioId ?? SCENARIO_MOLD.id} · {NCS_MOLD_ASSY.code} ·{" "}
-          {NCS_SAFETY.code} · AI 참고 {session.skillScore ?? "—"}점
-        </p>
+        <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+          <div className="rounded-md bg-bg px-3 py-2">
+            <dt className="text-muted">평가 단위</dt>
+            <dd className="mt-0.5 font-medium text-ink">
+              세션 1건 ({session.regNo})
+            </dd>
+            <dd className="text-muted">
+              영상 {counts.videos} · 사진 {counts.products} — 같은 시험의 근거
+            </dd>
+          </div>
+          <div className="rounded-md bg-bg px-3 py-2">
+            <dt className="text-muted">평가 기준 (NCS)</dt>
+            <dd className="mt-0.5 font-medium text-ink">
+              {NCS_MOLD_ASSY.title}
+            </dd>
+            <dd className="text-muted">
+              + {NCS_SAFETY.title} · E1–E4 · SAFE 루브릭
+            </dd>
+          </div>
+          <div className="rounded-md bg-bg px-3 py-2">
+            <dt className="text-muted">시험 시나리오</dt>
+            <dd className="mt-0.5 font-medium text-ink">{scenarioTitle}</dd>
+          </div>
+          <div className="rounded-md bg-bg px-3 py-2">
+            <dt className="text-muted">AI 참고 점수</dt>
+            <dd className="mt-0.5 font-medium text-ink">
+              {session.skillScore != null ? `${session.skillScore}점` : "—"}
+              {session.skillLevel ? ` · 제안 ${session.skillLevel}` : ""}
+            </dd>
+            <dd className="text-muted">확정값은 오른쪽 전문가 종합에서 결정</dd>
+          </div>
+        </dl>
       </div>
 
       <section className="mb-5 rounded-xl border border-line bg-surface p-4">
-        <h2 className="text-sm font-semibold">세션 미디어 근거</h2>
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-sm font-semibold">시험 근거 미디어</h2>
+            <p className="mt-0.5 text-xs text-muted">
+              라벨링으로 Stage/Event를 다듬고, AI 분석에서 상세 재생·근거 프레임을
+              확인한 뒤 아래에서 NCS 점수를 확정합니다.
+            </p>
+          </div>
+        </div>
         <div className="mt-3 grid gap-4 md:grid-cols-2">
           <div>
             <p className="mb-1 text-[11px] font-medium text-muted">영상</p>
-            <ul className="space-y-1 text-xs">
+            <ul className="space-y-1.5 text-xs">
               {videos.map((v) => {
                 const job = sessionJobs.find((j) => j.videoId === v.videoId);
                 const analysis = v.videoId ? getAnalysis(v.videoId) : undefined;
                 return (
                   <li
                     key={v.id}
-                    className="flex items-center justify-between gap-2 rounded-md bg-bg px-2 py-1.5"
+                    className="rounded-md bg-bg px-2.5 py-2"
                   >
-                    <span className="min-w-0 truncate">
-                      <span className="font-mono text-muted">
-                        {v.videoId ?? "—"}
-                      </span>{" "}
-                      {v.name}
+                    <p className="truncate font-medium text-ink">{v.name}</p>
+                    <p className="text-muted">
+                      {v.videoId ?? "—"}
                       {v.durationSec != null
                         ? ` · ${formatDuration(v.durationSec)}`
                         : ""}
                       {job ? ` · ${job.status}` : ""}
-                    </span>
-                    {analysis ? (
-                      <Link
-                        href={`/analysis/${v.videoId}/`}
-                        className="shrink-0 text-brand hover:underline"
-                      >
-                        분석
-                      </Link>
-                    ) : null}
+                      {analysis?.skillScore != null
+                        ? ` · AI ${analysis.skillScore}점`
+                        : ""}
+                    </p>
+                    <div className="mt-1.5 flex flex-wrap gap-2">
+                      {v.videoId && analysis ? (
+                        <Link
+                          href={`/analysis/${v.videoId}/`}
+                          className="font-medium text-brand hover:underline"
+                        >
+                          AI 분석·재생
+                        </Link>
+                      ) : null}
+                      {v.videoId ? (
+                        <Link
+                          href={`/labeling/?session=${session.id}&video=${v.videoId}`}
+                          className="text-brand hover:underline"
+                        >
+                          타임라인 라벨
+                        </Link>
+                      ) : null}
+                      {v.videoId && analysis ? (
+                        <Link
+                          href={`/analysis/${v.videoId}/review/`}
+                          className="text-muted hover:underline"
+                        >
+                          검수
+                        </Link>
+                      ) : null}
+                    </div>
                   </li>
                 );
               })}
@@ -164,9 +238,11 @@ export default function EvaluationClient() {
             {photos.length ? (
               <div className="flex flex-wrap gap-2">
                 {photos.map((p) => (
-                  <div
+                  <Link
                     key={p.id}
-                    className="w-16 overflow-hidden rounded border border-line"
+                    href={`/labeling/product/?session=${session.id}&media=${p.id}`}
+                    className="w-16 overflow-hidden rounded border border-line hover:border-brand"
+                    title={`${p.name} · 좌표 라벨`}
                   >
                     {p.src ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -180,23 +256,54 @@ export default function EvaluationClient() {
                         파일
                       </div>
                     )}
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
               <p className="text-xs text-muted">사진 없음</p>
             )}
+            {photos.length ? (
+              <p className="mt-2 text-[11px] text-muted">
+                사진을 누르면 조형물 좌표 라벨링으로 이동합니다.
+              </p>
+            ) : null}
           </div>
         </div>
       </section>
+
+      {primaryAnalysis?.evidenceFrames?.length ? (
+        <div className="mb-5">
+          <FrameRail
+            frames={primaryAnalysis.evidenceFrames}
+            title={`AI 근거 프레임 · ${primaryVideoId}`}
+          />
+          <p className="mt-2 text-xs text-muted">
+            프레임만으로는 재생이 부족하면{" "}
+            <Link
+              href={`/analysis/${primaryVideoId}/`}
+              className="text-brand hover:underline"
+            >
+              AI 분석 상세
+            </Link>
+            에서 타임라인·포즈·점수 분해를 확인하세요.
+          </p>
+        </div>
+      ) : null}
 
       <div className="grid gap-5 lg:grid-cols-5">
         <section className="space-y-3 lg:col-span-3">
           <h2 className="text-sm font-semibold">
             NCS 루브릭 (1–5) · 세션 종합
           </h2>
+          <p className="text-xs text-muted">
+            {NCS_MOLD_ASSY.title} 능력요소 E1–E4와 {NCS_SAFETY.title}(SAFE).
+            AI가 제안한 점수·이벤트를 보고 전문가가 수정합니다.
+          </p>
           {NCS_RUBRIC_ITEMS.map((item) => {
             const events = relatedEvents(item.id);
+            const aiScore = primaryAnalysis?.ncsRubric?.find(
+              (r) => r.element === item.id,
+            )?.score;
             return (
               <div
                 key={item.id}
@@ -205,7 +312,8 @@ export default function EvaluationClient() {
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-muted">
-                      {item.code} · {item.stageHint}
+                      {item.code} · {stageHintLabel(item.stageHint)}
+                      {aiScore != null ? ` · AI 제안 ${aiScore}` : ""}
                     </p>
                     <p className="font-medium">{item.title}</p>
                     <p className="text-xs text-muted">{item.desc}</p>
@@ -222,6 +330,7 @@ export default function EvaluationClient() {
                       }))
                     }
                     className="w-16 rounded-lg border border-line bg-bg px-2 py-1.5 text-center text-sm"
+                    aria-label={`${item.title} 점수`}
                   />
                 </div>
                 {events.length ? (
@@ -248,7 +357,7 @@ export default function EvaluationClient() {
                         [item.id]: e.target.value,
                       }))
                     }
-                    placeholder="세션 내 Stage·Event·영상·사진을 인용"
+                    placeholder="Stage·Event·영상·사진을 인용"
                     className="w-full rounded-md border border-line bg-bg px-2 py-1.5"
                   />
                 </label>
@@ -262,15 +371,15 @@ export default function EvaluationClient() {
           <p className="mt-2 text-xs text-muted">
             NCS 평균 <b className="text-ink">{ncsAvg.toFixed(1)}</b> / 5
             {session.skillScore != null ? (
-              <> · AI 참고 {session.skillScore}</>
+              <> · AI 참고 {session.skillScore}점</>
             ) : null}
           </p>
           <p className="mt-1 text-[11px] text-muted">
-            현재 NCS 상태: {session.ncsReviewStatus ?? "미검토"}
+            검토 상태: {session.ncsReviewStatus ?? "미검토"}
           </p>
 
           <label className="mt-4 block text-sm">
-            <span className="mb-1 block text-xs text-muted">숙련도 등급</span>
+            <span className="mb-1 block text-xs text-muted">숙련도 등급 (확정)</span>
             <select
               value={level}
               onChange={(e) => setLevel(e.target.value as typeof level)}
@@ -295,7 +404,9 @@ export default function EvaluationClient() {
 
           {primaryAnalysis?.ncsStages?.length ? (
             <div className="mt-4 rounded-lg bg-bg p-3 text-[11px] text-muted">
-              <p className="font-medium text-ink">대표 영상 Stage</p>
+              <p className="font-medium text-ink">
+                대표 영상 Stage (AI/라벨)
+              </p>
               <ul className="mt-1 space-y-0.5">
                 {primaryAnalysis.ncsStages.map((s) => {
                   const m = stageMeta(s.stageId);
@@ -314,7 +425,7 @@ export default function EvaluationClient() {
             onClick={() => setSaved(true)}
             className="mt-4 w-full rounded-lg bg-brand py-2.5 text-sm font-medium text-white"
           >
-            세션 NCS 평가 확정
+            NCS 숙련도 확정
           </button>
           {saved ? (
             <p className="mt-2 text-center text-xs text-ok">

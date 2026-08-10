@@ -13,6 +13,10 @@ import {
   type LabelingMediaItem,
 } from "@/lib/labelingMedia";
 
+function workHref(item: LabelingMediaItem) {
+  return timelineHref(item) ?? productHref(item);
+}
+
 export function LabelingMediaBrowser({
   mode = "full",
   initialWorkerId = "all",
@@ -25,7 +29,7 @@ export function LabelingMediaBrowser({
   initialWorkerId?: string;
   initialSessionId?: string;
   initialMediaKind?: "all" | "video" | "image";
-  /** compact: single pick callback */
+  /** compact: pick without leaving the page */
   onPick?: (item: LabelingMediaItem) => void;
   selectedKeys?: string[];
 }) {
@@ -36,8 +40,9 @@ export function LabelingMediaBrowser({
     initialMediaKind,
   );
   const [q, setQ] = useState("");
-  const [checked, setChecked] = useState<Set<string>>(
+  const active = useMemo(
     () => new Set(selectedKeys ?? []),
+    [selectedKeys?.join("|")],
   );
 
   useEffect(() => {
@@ -49,9 +54,6 @@ export function LabelingMediaBrowser({
   useEffect(() => {
     setMediaKind(initialMediaKind);
   }, [initialMediaKind]);
-  useEffect(() => {
-    if (selectedKeys) setChecked(new Set(selectedKeys));
-  }, [selectedKeys?.join("|")]);
 
   const sessions = useMemo(() => sessionsForWorker(workerId), [workerId]);
   const filtered = useMemo(
@@ -65,32 +67,9 @@ export function LabelingMediaBrowser({
     [catalog, workerId, sessionId, mediaKind, q],
   );
 
-  const selectedItems = filtered.filter((it) => checked.has(it.key));
-
-  function toggle(key: string) {
-    setChecked((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  }
-
-  function selectAllFiltered() {
-    setChecked(new Set(filtered.map((f) => f.key)));
-  }
-
-  function clearSelection() {
-    setChecked(new Set());
-  }
-
   return (
     <div className="space-y-3">
-      <div
-        className={`grid gap-2 ${
-          mode === "full" ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-2 lg:grid-cols-4"
-        }`}
-      >
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <label className="block text-xs">
           <span className="mb-1 block text-muted">사람</span>
           <select
@@ -149,68 +128,12 @@ export function LabelingMediaBrowser({
         </label>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-        <p className="text-muted">
-          표시 <b className="text-ink">{filtered.length}</b> / 전체 {catalog.length}
-          {checked.size ? (
-            <>
-              {" · "}
-              선택 <b className="text-brand">{checked.size}</b>
-            </>
-          ) : null}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={selectAllFiltered}
-            className="rounded-md border border-line px-2 py-1 hover:bg-bg"
-          >
-            현재 목록 전체 선택
-          </button>
-          <button
-            type="button"
-            onClick={clearSelection}
-            className="rounded-md border border-line px-2 py-1 hover:bg-bg"
-          >
-            선택 해제
-          </button>
-        </div>
-      </div>
-
-      {checked.size > 0 && mode === "full" ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-brand/30 bg-brand-soft/40 px-3 py-2 text-xs">
-          <span className="font-medium text-ink">
-            선택 {checked.size}건 작업
-          </span>
-          {selectedItems.some((i) => i.mediaKind === "video") ? (
-            <Link
-              href={
-                timelineHref(
-                  selectedItems.find((i) => i.mediaKind === "video")!,
-                ) ?? "/labeling/"
-              }
-              className="rounded-md bg-brand px-2.5 py-1 font-medium text-white"
-            >
-              타임라인 라벨로
-            </Link>
-          ) : null}
-          {selectedItems.some((i) => i.mediaKind === "image") ? (
-            <Link
-              href={
-                productHref(
-                  selectedItems.find((i) => i.mediaKind === "image")!,
-                ) ?? "/labeling/product/"
-              }
-              className="rounded-md border border-line bg-surface px-2.5 py-1 font-medium"
-            >
-              조형물 좌표로
-            </Link>
-          ) : null}
-          <span className="text-muted">
-            (복수 선택 시 첫 해당 미디어로 이동합니다)
-          </span>
-        </div>
-      ) : null}
+      <p className="text-xs text-muted">
+        표시 <b className="text-ink">{filtered.length}</b> / 전체 {catalog.length}
+        {mode === "full" ? (
+          <span> · 항목을 누르면 해당 라벨링 화면으로 이동합니다</span>
+        ) : null}
+      </p>
 
       <div
         className={
@@ -220,28 +143,17 @@ export function LabelingMediaBrowser({
         }
       >
         {filtered.map((it) => {
-          const isOn = checked.has(it.key);
+          const isOn = active.has(it.key);
+          const href = workHref(it);
           const thumb =
             it.mediaKind === "image" && it.media.src
               ? asset(it.media.src)
               : null;
-          return (
-            <div
-              key={it.key}
-              className={`flex gap-2 rounded-lg border p-2 text-xs transition ${
-                isOn
-                  ? "border-brand bg-brand-soft/30"
-                  : "border-line bg-surface hover:border-brand/40"
-              }`}
-            >
-              <label className="flex shrink-0 items-start pt-0.5">
-                <input
-                  type="checkbox"
-                  checked={isOn}
-                  onChange={() => toggle(it.key)}
-                  className="accent-brand"
-                />
-              </label>
+          const destLabel =
+            it.mediaKind === "video" ? "타임라인 라벨링" : "조형물 좌표";
+
+          const body = (
+            <>
               {thumb ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -263,35 +175,44 @@ export function LabelingMediaBrowser({
                 <p className="truncate text-[10px] text-muted">
                   {it.workerName} · {it.regNo} · {it.examDate}
                 </p>
-                <div className="mt-1 flex flex-wrap gap-2">
-                  {onPick ? (
-                    <button
-                      type="button"
-                      onClick={() => onPick(it)}
-                      className="text-brand hover:underline"
-                    >
-                      이 미디어 작업
-                    </button>
-                  ) : null}
-                  {timelineHref(it) ? (
-                    <Link
-                      href={timelineHref(it)!}
-                      className="text-brand hover:underline"
-                    >
-                      타임라인
-                    </Link>
-                  ) : null}
-                  {productHref(it) ? (
-                    <Link
-                      href={productHref(it)!}
-                      className="text-brand hover:underline"
-                    >
-                      좌표
-                    </Link>
-                  ) : null}
-                </div>
+                <p className="mt-1 text-[10px] font-medium text-brand">
+                  {destLabel} →
+                </p>
               </div>
-            </div>
+            </>
+          );
+
+          const cardClass = `flex gap-2 rounded-lg border p-2 text-xs transition ${
+            isOn
+              ? "border-brand bg-brand-soft/30"
+              : "border-line bg-surface hover:border-brand/40 hover:bg-brand-soft/20"
+          }`;
+
+          if (onPick) {
+            return (
+              <button
+                key={it.key}
+                type="button"
+                onClick={() => onPick(it)}
+                className={`${cardClass} w-full cursor-pointer text-left`}
+              >
+                {body}
+              </button>
+            );
+          }
+
+          if (!href) {
+            return (
+              <div key={it.key} className={`${cardClass} opacity-60`}>
+                {body}
+              </div>
+            );
+          }
+
+          return (
+            <Link key={it.key} href={href} className={cardClass}>
+              {body}
+            </Link>
           );
         })}
         {!filtered.length ? (

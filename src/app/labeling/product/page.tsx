@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { LabelingMediaBrowser } from "@/components/LabelingMediaBrowser";
+import { Plus, Save, Trash2 } from "lucide-react";
 import {
   getSession,
   getWorker,
@@ -59,7 +59,8 @@ function ProductLabelingInner() {
 
   const [sessionId, setSessionId] = useState(initial?.sessionId ?? "");
   const [mediaId, setMediaId] = useState(initial?.media.id ?? "");
-  const [showPicker, setShowPicker] = useState(true);
+  const [savedFlash, setSavedFlash] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>("b1");
 
   useEffect(() => {
     if (initial) {
@@ -76,6 +77,8 @@ function ProductLabelingInner() {
   const imgSrc = media?.src
     ? asset(media.src)
     : asset("/evidence/products/product-candidate.png");
+  const sessionImages =
+    session?.media.filter((m) => m.kind !== "video") ?? [];
 
   const imgRef = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{
@@ -98,6 +101,8 @@ function ProductLabelingInner() {
     },
   ]);
 
+  const selected = boxes.find((b) => b.id === selectedId) ?? null;
+
   function syncUrl(sId: string, mId: string) {
     const url = new URL(window.location.href);
     url.searchParams.set("session", sId);
@@ -105,11 +110,19 @@ function ProductLabelingInner() {
     window.history.replaceState({}, "", url.pathname + url.search);
   }
 
-  function pickMedia(item: LabelingMediaItem) {
+  function pickFromSelect(mId: string) {
+    setMediaId(mId);
+    setBoxes([]);
+    setSelectedId(null);
+    if (sessionId) syncUrl(sessionId, mId);
+  }
+
+  function switchImage(item: LabelingMediaItem) {
     if (item.mediaKind !== "image") return;
     setSessionId(item.sessionId);
     setMediaId(item.media.id);
     setBoxes([]);
+    setSelectedId(null);
     syncUrl(item.sessionId, item.media.id);
   }
 
@@ -126,6 +139,7 @@ function ProductLabelingInner() {
   function onDown(e: React.MouseEvent) {
     const p = relPos(e);
     setDrag({ x0: p.x, y0: p.y, x1: p.x, y1: p.y });
+    setSelectedId(null);
   }
   function onMove(e: React.MouseEvent) {
     if (!drag) return;
@@ -140,18 +154,12 @@ function ProductLabelingInner() {
     const h = Math.abs(drag.y1 - drag.y0);
     setDrag(null);
     if (w < 2 || h < 2) return;
+    const id = `b-${Date.now()}`;
     setBoxes((prev) => [
       ...prev,
-      {
-        id: `b-${Date.now()}`,
-        x,
-        y,
-        w,
-        h,
-        label,
-        note: note || label,
-      },
+      { id, x, y, w, h, label, note: note || label },
     ]);
+    setSelectedId(id);
     setNote("");
   }
 
@@ -164,89 +172,118 @@ function ProductLabelingInner() {
       }
     : null;
 
-  const sessionImages =
-    session?.media.filter((m) => m.kind !== "video") ?? [];
+  function updateSelected(patch: Partial<Box>) {
+    if (!selectedId) return;
+    setBoxes((prev) =>
+      prev.map((b) => (b.id === selectedId ? { ...b, ...patch } : b)),
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted">
-        결과 조형물 이미지 위에{" "}
-        <b className="font-medium text-ink">문제 영역 좌표(박스)</b>를
-        표시합니다. 사람·세션·이미지 필터로 대상을 고른 뒤 드래그로 bbox를
-        그립니다.
-      </p>
-
-      <div className="rounded-lg border border-line bg-surface">
+    <div className="flex h-full min-h-0 flex-col bg-[#1e1e22] text-[12px] text-slate-200">
+      <div className="flex h-9 shrink-0 items-center gap-2 border-b border-white/10 bg-[#2a2a30] px-2">
+        <select
+          value={`${sessionId}:${mediaId}`}
+          onChange={(e) => {
+            const [sId, mId] = e.target.value.split(":");
+            const hit = images.find(
+              (i) => i.sessionId === sId && i.media.id === mId,
+            );
+            if (hit) switchImage(hit);
+            else if (mId) pickFromSelect(mId);
+          }}
+          className="h-7 max-w-[18rem] truncate rounded border border-white/15 bg-[#1e1e22] px-2 text-[11px]"
+        >
+          {images.map((it) => (
+            <option key={it.key} value={`${it.sessionId}:${it.media.id}`}>
+              {it.workerName} · {it.regNo} · {it.media.name}
+            </option>
+          ))}
+        </select>
+        <span className="hidden truncate text-[11px] text-slate-400 sm:inline">
+          {worker?.name ?? "—"}
+          {session ? ` · ${session.regNo}` : ""}
+        </span>
+        <span className="text-[11px] text-slate-500">
+          드래그로 bbox · {boxes.length}개
+        </span>
         <button
           type="button"
-          onClick={() => setShowPicker((v) => !v)}
-          className="flex w-full items-center justify-between px-3 py-2 text-left text-xs font-medium"
+          onClick={() => {
+            setSavedFlash(true);
+            window.setTimeout(() => setSavedFlash(false), 1200);
+          }}
+          className="ml-auto inline-flex h-7 items-center gap-1 rounded bg-brand px-2.5 text-[11px] font-medium text-white"
         >
-          <span>
-            이미지 선택 · 필터
-            {session && media ? (
-              <span className="ml-2 font-normal text-muted">
-                {session.regNo} · {media.name}
-              </span>
-            ) : null}
-          </span>
-          <span className="text-muted">{showPicker ? "접기" : "펼치기"}</span>
+          <Save size={12} />
+          {savedFlash ? "저장됨" : "저장"}
         </button>
-        {showPicker ? (
-          <div className="border-t border-line px-3 py-3">
-            <LabelingMediaBrowser
-              mode="compact"
-              initialWorkerId={session?.workerId ?? "all"}
-              initialSessionId={sessionId || "all"}
-              initialMediaKind="image"
-              selectedKeys={
-                sessionId && mediaId ? [`${sessionId}:${mediaId}`] : undefined
-              }
-              onPick={pickMedia}
-            />
+      </div>
+
+      <div className="flex min-h-0 flex-1">
+        <aside className="flex w-48 shrink-0 flex-col border-r border-white/10 bg-[#25252b]">
+          <div className="flex h-8 shrink-0 items-center justify-between border-b border-white/10 px-2">
+            <span className="text-[11px] font-semibold text-slate-300">
+              객체
+            </span>
+            <span className="text-[10px] text-slate-500">{boxes.length}</span>
           </div>
-        ) : null}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-line bg-surface px-3 py-2.5 text-xs">
-        <span>
-          <span className="text-muted">기술자 </span>
-          <b className="font-medium">
-            {worker?.name ?? session?.workerId ?? "—"}
-          </b>
-        </span>
-        <span className="text-line">|</span>
-        <span>
-          <span className="text-muted">세션 </span>
-          <b className="font-medium">{session?.regNo ?? "—"}</b>
-        </span>
-        <span className="text-line">|</span>
-        <label className="inline-flex items-center gap-1.5">
-          <span className="text-muted">이미지</span>
-          <select
-            value={mediaId}
-            onChange={(e) => {
-              const id = e.target.value;
-              setMediaId(id);
-              setBoxes([]);
-              if (sessionId) syncUrl(sessionId, id);
-            }}
-            className="max-w-[16rem] truncate rounded border border-line bg-bg px-1.5 py-0.5 font-medium"
-          >
-            {sessionImages.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
+          <ul className="min-h-0 flex-1 space-y-0.5 overflow-y-auto p-1.5">
+            {boxes.map((b, i) => (
+              <li key={b.id}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedId(b.id);
+                    setLabel(b.label);
+                    setNote(b.note);
+                  }}
+                  className={`flex w-full items-center gap-1.5 rounded px-1.5 py-1 text-left ${
+                    selectedId === b.id
+                      ? "bg-brand/25 text-white"
+                      : "hover:bg-white/5"
+                  }`}
+                >
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-sm bg-red-400" />
+                  <span className="min-w-0 flex-1 truncate">
+                    {i + 1}. {b.label}
+                  </span>
+                </button>
+              </li>
             ))}
-          </select>
-        </label>
-      </div>
+            {!boxes.length ? (
+              <li className="px-2 py-6 text-center text-[11px] text-slate-500">
+                캔버스에서 드래그하여 추가
+              </li>
+            ) : null}
+          </ul>
+          <div className="border-t border-white/10 p-1.5">
+            <p className="mb-1 px-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+              라벨 팔레트
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {ISSUE_LABELS.map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => setLabel(l)}
+                  className={`rounded px-1.5 py-0.5 text-[10px] ${
+                    label === l
+                      ? "bg-brand text-white"
+                      : "border border-white/15 text-slate-400 hover:bg-white/5"
+                  }`}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside>
 
-      <div className="grid gap-4 lg:grid-cols-5">
-        <section className="rounded-xl border border-line bg-surface p-4 lg:col-span-3">
+        <section className="relative min-w-0 flex-1 bg-black">
           <div
             ref={imgRef}
-            className="relative aspect-[4/3] cursor-crosshair select-none overflow-hidden rounded-lg bg-slate-100"
+            className="absolute inset-0 cursor-crosshair select-none"
             onMouseDown={onDown}
             onMouseMove={onMove}
             onMouseUp={onUp}
@@ -260,9 +297,20 @@ function ProductLabelingInner() {
               draggable={false}
             />
             {boxes.map((b) => (
-              <div
+              <button
                 key={b.id}
-                className="absolute border-2 border-danger bg-danger/10"
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedId(b.id);
+                  setLabel(b.label);
+                  setNote(b.note);
+                }}
+                className={`absolute border-2 ${
+                  selectedId === b.id
+                    ? "border-brand bg-brand/15"
+                    : "border-red-400 bg-red-500/10"
+                }`}
                 style={{
                   left: `${b.x}%`,
                   top: `${b.y}%`,
@@ -270,10 +318,10 @@ function ProductLabelingInner() {
                   height: `${b.h}%`,
                 }}
               >
-                <span className="absolute -top-5 left-0 whitespace-nowrap rounded bg-danger px-1 text-[10px] text-white">
+                <span className="absolute -top-5 left-0 whitespace-nowrap rounded bg-red-500 px-1 text-[10px] text-white">
                   {b.label}
                 </span>
-              </div>
+              </button>
             ))}
             {preview ? (
               <div
@@ -287,62 +335,86 @@ function ProductLabelingInner() {
               />
             ) : null}
           </div>
-          <p className="mt-2 text-[11px] text-muted">
-            드래그하여 박스를 그립니다. 좌표는 이미지 대비 %로 저장됩니다.
-          </p>
         </section>
 
-        <section className="rounded-xl border border-line bg-surface p-4 lg:col-span-2">
-          <h2 className="text-sm font-semibold">문제점 라벨</h2>
-          <label className="mt-3 block text-sm">
-            <span className="mb-1 block text-xs text-muted">유형</span>
-            <select
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              className="w-full rounded-lg border border-line bg-bg px-3 py-2"
-            >
-              {ISSUE_LABELS.map((l) => (
-                <option key={l} value={l}>
-                  {l}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="mt-3 block text-sm">
-            <span className="mb-1 block text-xs text-muted">메모</span>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={3}
-              className="w-full resize-none rounded-lg border border-line bg-bg px-3 py-2"
-            />
-          </label>
-
-          <ul className="mt-4 max-h-80 space-y-2 overflow-y-auto text-sm">
-            {boxes.map((b) => (
-              <li
-                key={b.id}
-                className="rounded-lg border border-line bg-bg px-3 py-2"
+        <aside className="flex w-56 shrink-0 flex-col border-l border-white/10 bg-[#25252b]">
+          <div className="flex h-8 shrink-0 items-center border-b border-white/10 px-2 text-[11px] font-semibold text-slate-300">
+            속성
+          </div>
+          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-2">
+            <label className="block">
+              <span className="mb-0.5 block text-[10px] text-slate-500">
+                세션 이미지
+              </span>
+              <select
+                value={mediaId}
+                onChange={(e) => pickFromSelect(e.target.value)}
+                className="h-8 w-full rounded border border-white/15 bg-[#1e1e22] px-2 text-[11px]"
               >
-                <p className="font-medium">{b.label}</p>
-                <p className="font-mono text-[11px] text-muted">
-                  x:{b.x.toFixed(1)}% y:{b.y.toFixed(1)}% w:{b.w.toFixed(1)}% h:
-                  {b.h.toFixed(1)}%
-                </p>
-                <p className="mt-1 text-xs text-muted">{b.note}</p>
-                <button
-                  type="button"
-                  className="mt-1 text-[11px] text-danger hover:underline"
-                  onClick={() =>
-                    setBoxes((prev) => prev.filter((x) => x.id !== b.id))
-                  }
-                >
-                  삭제
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
+                {sessionImages.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="mb-0.5 block text-[10px] text-slate-500">유형</span>
+              <select
+                value={selected?.label ?? label}
+                onChange={(e) => {
+                  setLabel(e.target.value);
+                  updateSelected({ label: e.target.value });
+                }}
+                className="h-8 w-full rounded border border-white/15 bg-[#1e1e22] px-2 text-[11px]"
+              >
+                {ISSUE_LABELS.map((l) => (
+                  <option key={l} value={l}>
+                    {l}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="mb-0.5 block text-[10px] text-slate-500">메모</span>
+              <textarea
+                rows={3}
+                value={selected ? selected.note : note}
+                onChange={(e) => {
+                  setNote(e.target.value);
+                  updateSelected({ note: e.target.value });
+                }}
+                className="w-full resize-none rounded border border-white/15 bg-[#1e1e22] px-2 py-1.5 text-[11px]"
+              />
+            </label>
+            {selected ? (
+              <p className="font-mono text-[10px] text-slate-500">
+                x:{selected.x.toFixed(1)} y:{selected.y.toFixed(1)} w:
+                {selected.w.toFixed(1)} h:{selected.h.toFixed(1)}
+              </p>
+            ) : (
+              <p className="text-[10px] text-slate-500">
+                선택 없음 · 캔버스 드래그로 새 박스
+              </p>
+            )}
+            <button
+              type="button"
+              disabled={!selectedId}
+              onClick={() => {
+                setBoxes((prev) => prev.filter((x) => x.id !== selectedId));
+                setSelectedId(null);
+              }}
+              className="inline-flex h-8 w-full items-center justify-center gap-1 rounded border border-white/15 text-red-300 disabled:opacity-40"
+            >
+              <Trash2 size={12} />
+              선택 삭제
+            </button>
+            <p className="flex items-start gap-1 text-[10px] text-slate-500">
+              <Plus size={11} className="mt-0.5 shrink-0" />
+              새 박스는 왼쪽 팔레트 라벨로 그려집니다.
+            </p>
+          </div>
+        </aside>
       </div>
     </div>
   );
@@ -352,7 +424,7 @@ export default function ProductLabelingPage() {
   return (
     <Suspense
       fallback={
-        <p className="text-sm text-muted">조형물 좌표 라벨링을 불러오는 중…</p>
+        <p className="p-4 text-sm text-muted">조형물 좌표 라벨링을 불러오는 중…</p>
       }
     >
       <ProductLabelingInner />
