@@ -1006,6 +1006,72 @@
 
 .dark .lede em { color: #fff; }
 
+.tier3 {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 10px;
+  align-items: stretch;
+  margin-top: 0.4vh;
+}
+
+.tier3 > div {
+  padding: 1.6vh 1.2vw;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.tier3 > div:nth-child(1) {
+  border-color: #9ec4ef;
+  background: #f3f7fd;
+}
+
+.tier3 > div:nth-child(5) {
+  border-color: #b7d4a8;
+  background: #f3faf0;
+}
+
+.tier3 em {
+  display: block;
+  color: var(--blue);
+  font-size: 11px;
+  font-style: normal;
+  letter-spacing: 0.1em;
+}
+
+.tier3 b {
+  display: block;
+  margin: 8px 0 12px;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.tier3 code {
+  display: block;
+  margin-bottom: 10px;
+  padding: 12px 10px;
+  background: var(--navy);
+  color: var(--lime);
+  font-family: Manrope, "Noto Sans KR", monospace;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.tier3 span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.tier3 > i {
+  display: grid;
+  place-items: center;
+  color: var(--blue);
+  font-style: normal;
+  font-weight: 700;
+  font-size: 18px;
+}
+
 /* cover: no external photo asset on Pages */
 .cover .photo {
   background: linear-gradient(135deg, #061326 0%, #0d2b4b 45%, #163a5f 100%);
