@@ -293,38 +293,49 @@
     <p class="head-tag">Explainable</p>
   </div>
 
-  <div class="std-seq">
-    <b>표준 시퀀스 · 0411</b>
-    <div class="std-flow">
-      <span><em>S01</em>조립 부품 준비</span><i>→</i>
-      <span><em>S02</em>고정측 조립</span><i>→</i>
-      <span><em>S03</em>가동측 조립</span><i>→</i>
-      <span><em>S04</em>금형조립 확인</span><i>→</i>
-      <span><em>S05</em>정리정돈</span>
-    </div>
-    <p>S01~S04 = 0411 · S05 = 0410</p>
-  </div>
-
-  <div class="seq-compare">
-    <div>
-      <b>정상</b>
+  <div class="seq-pair">
+    <article class="seq-std">
+      <header>
+        <b>표준</b>
+        <span>NCS 0411 · SOP 확정본</span>
+      </header>
+      <div class="std-flow">
+        <span><em>S01</em>조립 부품 준비</span><i>→</i>
+        <span><em>S02</em>고정측 조립</span><i>→</i>
+        <span><em>S03</em>가동측 조립</span><i>→</i>
+        <span><em>S04</em>금형조립 확인</span><i>→</i>
+        <span><em>S05</em>정리정돈</span>
+      </div>
+      <p>S01~S04 = 0411 · S05 = 0410</p>
+    </article>
+    <article class="seq-ok">
+      <header>
+        <b>정상</b>
+        <span>표준 일치 수행</span>
+      </header>
       <code>S01 → S02 → S03 → S04 → S05</code>
-    </div>
-    <div>
-      <b>편차</b>
-      <code>S01 → S02 → S03 → S02 → S04 → S05</code>
-    </div>
+      <p>순서 일치 · 필수 단계 누락 없음</p>
+    </article>
   </div>
 
-  <div class="metric-cards">
-    <div><b>83%</b><span>순서 일치</span></div>
-    <div><b>1회</b><span>S02 반복</span></div>
-    <div><b>1회</b><span>S03 재작업</span></div>
-    <div><b>+18%</b><span>시간 초과</span></div>
-    <div><b>0건</b><span>누락</span></div>
-    <div><b>1건</b><span>공구 오류</span></div>
+  <div class="seq-dev">
+    <header>
+      <b>편차 예시</b>
+      <span>표준 대비</span>
+    </header>
+    <div class="seq-dev-body">
+      <code>S01 → S02 → S03 → S02 → S04 → S05</code>
+      <div class="metric-cards compact">
+        <div><b>83%</b><span>순서 일치</span></div>
+        <div><b>1회</b><span>S02 반복</span></div>
+        <div><b>1회</b><span>S03 재작업</span></div>
+        <div><b>+18%</b><span>시간 초과</span></div>
+        <div><b>0건</b><span>누락</span></div>
+        <div><b>1건</b><span>공구 오류</span></div>
+      </div>
+    </div>
+    <p class="metric-note">※ 수치 = 표현 예시</p>
   </div>
-  <p class="metric-note">※ 수치 = 표현 예시</p>
 
   <div class="call-line">
     <b>평가 축</b>

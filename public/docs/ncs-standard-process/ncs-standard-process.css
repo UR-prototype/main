@@ -632,6 +632,135 @@
   letter-spacing: 0.08em;
 }
 
+.seq-pair {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 12px;
+  margin-bottom: 1.2vh;
+}
+
+.seq-pair > article {
+  padding: 1.5vh 1.3vw;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.seq-pair header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.seq-pair header b {
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.seq-pair header span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.seq-std {
+  border-color: #9ec4ef;
+  background: #f3f7fd;
+}
+
+.seq-ok {
+  border-color: #b7d4a8;
+  background: #f3faf0;
+}
+
+.seq-pair .std-flow {
+  margin-bottom: 12px;
+}
+
+.seq-pair .std-flow span {
+  background: var(--navy);
+  font-size: 12px;
+}
+
+.seq-pair > article > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.seq-ok code {
+  display: block;
+  margin-bottom: 12px;
+  padding: 16px 14px;
+  background: var(--navy);
+  color: var(--lime);
+  font-family: Manrope, "Noto Sans KR", monospace;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.seq-dev {
+  margin-bottom: 1.2vh;
+  padding: 1.4vh 1.3vw;
+  border: 1px solid #d7c4b8;
+  background: #faf6f3;
+}
+
+.seq-dev > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.seq-dev > header b {
+  font-size: 14px;
+  color: #8d624c;
+}
+
+.seq-dev > header span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.seq-dev-body {
+  display: grid;
+  grid-template-columns: 1.1fr 1.4fr;
+  gap: 14px;
+  align-items: center;
+}
+
+.seq-dev-body code {
+  display: block;
+  padding: 14px;
+  background: var(--navy);
+  color: #ffd6a8;
+  font-family: Manrope, "Noto Sans KR", monospace;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.metric-cards.compact {
+  margin: 0;
+  gap: 6px;
+}
+
+.metric-cards.compact > div {
+  padding: 1vh 0.4vw;
+}
+
+.metric-cards.compact b {
+  font-size: 18px;
+}
+
+.metric-cards.compact span {
+  font-size: 11px;
+}
+
 .seq-compare {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -851,7 +980,9 @@
   .source-grid,
   .seq-compare,
   .request-split,
-  .verdict-pair {
+  .verdict-pair,
+  .seq-pair,
+  .seq-dev-body {
     grid-template-columns: 1fr;
   }
 
