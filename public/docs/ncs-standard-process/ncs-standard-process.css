@@ -305,6 +305,10 @@
   font-size: 13px;
 }
 
+.scope-table.cols6 > div {
+  grid-template-columns: 1.4fr 1.2fr 0.4fr 0.45fr 0.55fr;
+}
+
 .scope-table .st-h {
   background: var(--navy);
   color: #ffffffb8;
@@ -420,12 +424,17 @@
 .ncs-flow span { font-size: 12px; }
 
 @media (max-width: 1100px) {
-  .scope-table > div { grid-template-columns: 0.6fr 1.2fr 1.2fr; }
+  .scope-table > div,
+  .scope-table.cols6 > div { grid-template-columns: 1.2fr 1fr 0.5fr; }
   .scope-table > div span:nth-child(4),
-  .scope-table > div span:nth-child(5) { display: none; }
+  .scope-table > div span:nth-child(5),
   .scope-table .st-h span:nth-child(4),
   .scope-table .st-h span:nth-child(5) { display: none; }
   .extract-grid { grid-template-columns: repeat(2, 1fr); }
+  .metric-cards { grid-template-columns: repeat(3, 1fr); }
+  .steps-five { grid-template-columns: 1fr 1fr; }
+  .level-table > div { grid-template-columns: 1fr 1fr; }
+  .level-table > div span:nth-child(3) { grid-column: 1 / -1; }
 }
 
 @media (max-width: 650px) {
@@ -700,6 +709,40 @@
   font-size: 14px;
   font-weight: 600;
   line-height: 1.55;
+}
+
+.cross-axis {
+  margin-bottom: 1.2vh;
+  padding: 1.3vh 1.3vw;
+  border: 1px dashed var(--line);
+  background: #f7f9fc;
+}
+
+.cross-axis > b {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--blue);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+.cross-axis .chip-row span {
+  background: #fff;
+}
+
+.metric-cards.compact.example > div {
+  background: #f4f6f9;
+  border-style: dashed;
+}
+
+.metric-cards.compact.example b {
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.example-note {
+  font-weight: 600;
+  color: #8d624c;
 }
 
 .seq-dev {
