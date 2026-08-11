@@ -263,6 +263,34 @@
   font-weight: 600;
 }
 
+.chip-row.stage span {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+  letter-spacing: 0.04em;
+}
+
+.decomp-step .src-note {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.std-define {
+  margin: 1.2vh 0 0;
+  padding: 12px 14px;
+  border-left: 3px solid var(--blue);
+  background: #eef3fb;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.ncs-flow span {
+  font-size: 12px;
+}
+
 .flow-inline {
   color: var(--ink);
   font-size: 16px;

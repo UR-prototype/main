@@ -42,7 +42,7 @@
     </div>
   </div>
   <div class="meta">
-    <span>대상 · 단순 사출금형 조립 (NCS 1510010411)</span>
+    <span>대상 · 단순 사출금형 조립 (NCS 1510010411_18v3)</span>
     <span>근거 · NCS + 현장 SOP + 숙련자 영상</span>
     <span>산출 · 표준 작업 시퀀스 · AI 지표 · 숙련도 평가</span>
   </div>
@@ -98,7 +98,7 @@
 
   <div class="call-line">
     <b>적용 원칙</b>
-    NCS 수행준거 중 <em>작업 과정에서 관찰 가능한 항목을 선별</em>하여 영상 분석 기준으로 구체화합니다. 도면해독·이론지식 등 비가시 항목은 본 영상 평가 범위에서 제외합니다.
+    NCS 수행준거 중 <em>작업 과정에서 관찰 가능한 항목을 선별</em>하여 영상 분석 기준으로 구체화합니다. 영상만으로 직접 판별하기 어려운 지식·판단 영역은 영상 기반 숙련도 평가에서 제외하거나 별도 평가항목으로 구분합니다.
   </div>
 </section>
 
@@ -125,26 +125,38 @@
     <i>→</i>
     <div><em>04</em><b>AI 분석 지표</b><span>순서·시간·공구·반복</span></div>
     <i>→</i>
-    <div class="out"><em>05</em><b>숙련도 평가</b><span>점수·등급·근거</span></div>
+    <div class="out"><em>05</em><b>숙련도 평가</b><span>평가항목·가중치·등급</span></div>
   </div>
 
   <div class="decomp-board">
     <div class="decomp-step">
-      <em>NCS 능력단위 수준 · 확정</em>
-      <h3>단순 사출금형 조립 <code>1510010411</code></h3>
+      <em>NCS 능력단위 및 능력단위요소 · 과제 적용 기준</em>
+      <h3>단순 사출금형 조립 <code>1510010411_18v3</code></h3>
       <div class="ncs-flow">
-        <span>E1 조립 준비</span><i>→</i>
-        <span>E2 고정측 조립</span><i>→</i>
-        <span>E3 가동측 조립</span><i>→</i>
-        <span>E4 조립 확인</span>
+        <span>금형부품 준비하기</span><i>→</i>
+        <span>고정측 조립하기</span><i>→</i>
+        <span>가동측 조립하기</span><i>→</i>
+        <span>금형 확인하기</span>
       </div>
-      <p>Stage 대응 · <code>PREP → FIXED → MOVING → CONFIRM</code> (+ 마무리 <code>CLOSE</code>)</p>
+      <p class="src-note">출처 · NCS 능력단위 정의(금형부품 준비, 고정측 조립, 가동측 조립, 금형 확인) · HRD 직종설명서 및 과제 라벨링 가이드 기준</p>
     </div>
     <div class="decomp-arrow">↓</div>
     <div class="decomp-step pending">
       <em>현장 SOP 확보 후 · 세부 작업으로 분해</em>
       <div class="flow-inline muted">부품 확인 → ○○ 조립 → 체결 → 간극 확인 → …</div>
       <p>실증기업의 SOP·공정순서를 반영하여 세부 단계를 확정합니다.</p>
+    </div>
+    <div class="decomp-arrow">↓</div>
+    <div class="decomp-step">
+      <em>UR Connection 내부 분석 Stage · NCS와 구분</em>
+      <div class="chip-row stage">
+        <span>PREP</span>
+        <span>FIXED</span>
+        <span>MOVING</span>
+        <span>CONFIRM</span>
+        <span>CLOSE</span>
+      </div>
+      <p><code>CLOSE</code>는 NCS 능력단위요소에 없는 정리·마무리 구간으로, 내부 분석용으로 추가합니다.</p>
     </div>
     <div class="decomp-arrow">↓</div>
     <div class="decomp-step">
@@ -162,19 +174,19 @@
 
   <div class="call-line">
     <b>구분 포인트</b>
-    NCS에서 제공하는 범위와, 현장 SOP·영상을 통해 <em>추가로 정의해야 할 세부 시퀀스</em>를 명확히 나눕니다.
+    NCS 능력단위요소와 UR 내부 Stage를 분리하여 표기합니다. NCS 범위와, 현장 SOP·영상을 통해 <em>추가로 정의해야 할 세부 시퀀스</em>를 명확히 나눕니다.
   </div>
 </section>
 
 <!-- ========== 04 ========== -->
 <section class="slide dark dense" id="p04" data-section>
   <span class="num">04</span>
-  <p class="kicker">TWO SOURCES</p>
+  <p class="kicker">EVIDENCE BASE</p>
   <div class="head row">
     <div class="head-main">
       <h2>NCS와 현장자료를 함께 확보합니다</h2>
       <div class="lede">
-        <p>NCS는 「무엇을 할 수 있어야 하는가」를, 현장자료는 「실제로 어떤 순서로 수행하는가」를 제공합니다. 표준 작업 시퀀스는 두 자료의 결합으로 완성됩니다.</p>
+        <p>NCS는 「무엇을 할 수 있어야 하는가」를, 현장자료(SOP·도면·영상·평가표 등)는 「실제로 어떤 순서로 수행하는가」를 제공합니다. 표준 작업 시퀀스는 이 근거 자료의 결합으로 완성됩니다.</p>
       </div>
     </div>
     <p class="head-tag light">객관 기준 + 실제 절차</p>
@@ -242,7 +254,7 @@
     <div>
       <b>L2 능력단위요소</b>
       <span>주요 수행 단계</span>
-      <span>고정측 조립 (E2)</span>
+      <span>고정측 조립하기</span>
     </div>
     <div>
       <b>L3 표준작업</b>
@@ -305,11 +317,11 @@
 
   <div class="seq-compare">
     <div>
-      <b>숙련자 · 표준 대비 정상 흐름</b>
+      <b>표준 시퀀스 대비 · 정상 수행 예시</b>
       <code>S01 → S02 → S03 → S04 → S05 → S06</code>
     </div>
     <div>
-      <b>초급자 · 관측 예시</b>
+      <b>관측 영상 · 편차 예시</b>
       <code>S01 → S02 → S03 → S02 → S04 → S05 → S04 → S06</code>
     </div>
   </div>
@@ -328,6 +340,7 @@
     <b>평가 정의</b>
     표준 작업 프로세스 대비 <em>작업 순서, 단계별 소요시간, 반복·재작업, 누락, 공구 사용 및 작업 정확도</em>를 분석하여 숙련도를 평가합니다.
   </div>
+  <p class="std-define">표준 시퀀스는 NCS·SOP를 기준으로 숙련 작업 사례를 분석하고 현장 전문가 검토를 거쳐 확정합니다. 숙련자 1명의 행동이 곧 표준이 되지는 않습니다.</p>
 </section>
 
 <!-- ========== 07 ========== -->
@@ -349,7 +362,7 @@
     <div><em>2</em><b>NCS 수행준거 매핑</b><span>관찰 가능 항목 선별·연결</span></div>
     <div><em>3</em><b>영상 관찰 포인트 정의</b><span>행동·공구·확인 항목</span></div>
     <div><em>4</em><b>AI 지표·표준 시퀀스 정의</b><span>순서·시간·반복·누락</span></div>
-    <div><em>5</em><b>숙련도 산식 설계</b><span>점수·등급·판정 근거</span></div>
+    <div><em>5</em><b>숙련도 평가체계 설계</b><span>평가항목 · 가중치 · 점수 · 등급 · 판정 근거</span></div>
   </div>
 
   <div class="request-split">
@@ -377,7 +390,7 @@
 
   <div class="final-line">
     <b>전달 메시지</b>
-    <p>NCS가 표준 작업 시퀀스를 그대로 제공하지는 않습니다. <em>NCS로 평가 기준을 잡고, 현장 SOP로 실제 순서를 정의하며, 숙련자 영상으로 정상 수행 패턴을 확보</em>하는 구조로 표준 작업 프로세스를 완성합니다.</p>
+    <p>NCS가 표준 작업 시퀀스를 그대로 제공하지는 않습니다. <em>NCS로 평가 기준을 잡고, 현장 SOP로 실제 순서를 정의하며, 복수의 숙련 작업 사례와 전문가 검토로 정상 수행 패턴을 확정</em>하는 구조로 표준 작업 프로세스를 완성합니다.</p>
   </div>
 </section>
 
