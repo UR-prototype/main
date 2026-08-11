@@ -321,6 +321,49 @@
 .ok-tag { color: #2f6b2f; font-weight: 600; }
 .wait-tag { color: #8d624c; font-weight: 600; }
 
+.level-table .span-full {
+  display: block;
+  padding: 14px;
+}
+
+.level-table .span-full > b {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.crit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.crit-grid > div {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: #f7f9fc;
+}
+
+.crit-grid em {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--blue);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.crit-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .crit-grid { grid-template-columns: 1fr; }
+}
+
 .extract-box {
   margin-bottom: 1.4vh;
   padding: 1.5vh 1.4vw;
