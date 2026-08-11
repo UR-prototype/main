@@ -1025,9 +1025,12 @@
   .request-split,
   .verdict-pair,
   .seq-pair,
-  .seq-dev-body {
+  .seq-dev-body,
+  .tier3 {
     grid-template-columns: 1fr;
   }
+
+  .tier3 > i { display: none; }
 
   .chain-bar > i { display: none; }
   .final-line { grid-template-columns: 1fr; gap: 8px; }
