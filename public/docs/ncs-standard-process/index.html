@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="description" content="유알커넥션 — NCS 분석 결과 기반 금형조립 AI 숙련도 평가 기준 설계" />
-  <title>유알커넥션 · NCS 기반 숙련도 평가 기준</title>
+  <title>유알커넥션 · 금형조립 숙련도 평가 기준</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -27,14 +27,14 @@
 
 <main>
 
-<!-- ========== 01 개요 ========== -->
+<!-- ========== 01 ========== -->
 <section class="slide cover dense" id="p01" data-section>
   <div class="photo"></div><div class="shade"></div>
   <div class="cover-copy">
     <span class="tag">PROCESS BRIEF · 2026</span>
     <p>유알커넥션</p>
-    <h1>금형조립 숙련도<br>평가 기준</h1>
-    <p class="cover-note">작업 영상 기반 · 작업 수행 과정과 숙련도 평가체계 설계</p>
+    <h1>금형조립 표준 작업 프로세스<br>· 숙련도 평가 기준</h1>
+    <p class="cover-note">작업 영상 기반 평가체계 · NCS · 현장 SOP · 숙련자 영상</p>
     <div class="purpose">
       <b>수단</b>
       AI가 임의 기준으로 평가하지 않도록 · NCS를 평가 기준의 출발점으로 활용
@@ -46,108 +46,93 @@
   </div>
 </section>
 
-<!-- ========== 02 구성·적용 ========== -->
+<!-- ========== 02 ========== -->
 <section class="slide paper dense" id="p02" data-section>
   <span class="num">02</span>
-  <p class="kicker">FRAMEWORK · NCS</p>
+  <p class="kicker">FRAMEWORK · ANALYSIS</p>
   <div class="head row">
     <div class="head-main">
-      <h2>평가 기준 구성 · 적용 NCS</h2>
+      <h2>평가 기준 구성 · NCS 분석</h2>
       <div class="lede">
-        <p>구성 원리 · NCS 분석 결과</p>
+        <p>구성 원리 → 대입 예시 → 적용·분석 결과</p>
       </div>
     </div>
   </div>
 
-  <div class="section-rule"><span>구성 원리</span></div>
-  <div class="role-strip">
-    <div><em>NCS</em><b>수행기준</b><span>작업과 기준</span></div>
-    <div><em>SOP</em><b>현장 방식</b><span>순서 · 방식</span></div>
-    <div><em>영상</em><b>정상 패턴</b><span>관찰 가능 수행</span></div>
-    <div><em>AI</em><b>측정</b><span>순서 · 시간 · 누락 · 공구</span></div>
-  </div>
-
-  <div class="tier3 tight">
-    <div>
-      <em>01</em>
-      <b>NCS 상위 기준</b>
-      <code>고정측 조립하기</code>
-      <span>평가 범위</span>
-    </div>
-    <i>↓</i>
-    <div>
-      <em>02</em>
-      <b>SOP 핵심 단계</b>
-      <code>부품 배치 → 체결 → 확인</code>
-      <span>필수만</span>
-    </div>
-    <i>↓</i>
-    <div>
-      <em>03</em>
-      <b>AI 평가항목</b>
-      <code>순서 · 시간 · 누락 · 반복 · 공구</code>
-      <span>최소 이벤트</span>
+  <!-- A: parallel roles (not a timeline) -->
+  <div class="band band-roles">
+    <header class="band-h">
+      <em>A</em>
+      <b>구성 요소</b>
+      <span>병행 역할 · 순서가 아님</span>
+    </header>
+    <div class="role-strip">
+      <div><em>NCS</em><b>수행기준</b><span>무엇을 수행해야 하는가</span></div>
+      <div><em>SOP</em><b>현장 방식</b><span>실제로 어떤 순서로 수행하는가</span></div>
+      <div><em>영상</em><b>정상 패턴</b><span>정상 수행은 어떻게 나타나는가</span></div>
+      <div><em>AI</em><b>측정</b><span>어떤 차이를 측정하는가</span></div>
     </div>
   </div>
 
-  <div class="section-rule"><span>적용 NCS · 0411 분석</span></div>
-
-  <div class="scope-map compact">
-    <div class="scope-core slim">
-      <span class="role-tag core">핵심</span>
-      <h3>단순 사출금형 조립</h3>
-      <code class="code-quiet">1510010411_24v4</code>
-    </div>
-    <div class="scope-side horizontal">
-      <div class="scope-block">
-        <span class="role-tag">병행</span>
-        <b>다듬질</b>
-        <code class="code-quiet">0403</code>
-        <b>조립부품검토</b>
-        <code class="code-quiet">0402</code>
+  <!-- B: sequential example only -->
+  <div class="band band-example">
+    <header class="band-h">
+      <em>B</em>
+      <b>대입 예시</b>
+      <span>세로 변환 · 고정측 조립</span>
+    </header>
+    <div class="tier3 tight">
+      <div>
+        <em>NCS</em>
+        <b>상위 기준</b>
+        <code>고정측 조립하기</code>
       </div>
-      <div class="scope-block cross">
-        <span class="role-tag cross">공통</span>
-        <b>안전규정 준수</b>
-        <code class="code-quiet">0410</code>
+      <i>↓</i>
+      <div>
+        <em>SOP</em>
+        <b>핵심 단계</b>
+        <code>부품 확인 → 배치 → 체결 → 확인</code>
       </div>
-      <div class="scope-block muted">
-        <span class="role-tag muted">보조</span>
-        <b>도면해독</b>
-        <code class="code-quiet">0401</code>
+      <i>↓</i>
+      <div>
+        <em>영상</em>
+        <b>관찰 행동</b>
+        <code>부품 선택 · 공구 사용 · 체결</code>
+      </div>
+      <i>↓</i>
+      <div>
+        <em>AI</em>
+        <b>평가항목</b>
+        <code>순서 · 시간 · 누락 · 반복</code>
       </div>
     </div>
   </div>
 
-  <div class="analysis-board">
-    <article>
-      <em>S01</em>
-      <b>조립 부품 준비하기</b>
-      <span>사양서 · 부품 · 공구 · 보호구</span>
-    </article>
-    <i>→</i>
-    <article>
-      <em>S02</em>
-      <b>고정측 조립하기</b>
-      <span>기준면 · 로케이트링 · 스프루 · 캐비티</span>
-    </article>
-    <i>→</i>
-    <article>
-      <em>S03</em>
-      <b>가동측 조립하기</b>
-      <span>코어 · 이젝트 · 냉각 · 가동측 부품</span>
-    </article>
-    <i>→</i>
-    <article>
-      <em>S04</em>
-      <b>금형조립 확인하기</b>
-      <span>점검 · 수량·이상 · 체크리스트</span>
-    </article>
+  <!-- C: analysis result (table, not another timeline) -->
+  <div class="band band-analysis">
+    <header class="band-h">
+      <em>C</em>
+      <b>적용 · 분석 결과</b>
+      <span>NCS에서 뽑은 것</span>
+    </header>
+    <div class="scope-chips">
+      <span class="core">핵심 · 단순 사출금형 조립 <i>0411</i></span>
+      <span>병행 · 다듬질 <i>0403</i> · 부품검토 <i>0402</i></span>
+      <span>공통 · 안전 <i>0410</i></span>
+      <span>보조 · 도면해독 <i>0401</i></span>
+    </div>
+    <div class="result-table">
+      <div class="mt-h"><span>단계</span><span>NCS에서 확인한 주요 수행 내용</span></div>
+      <div><b>S01 · 조립 부품 준비</b><span>사양서 · 부품 · 공구 · 보호구</span></div>
+      <div><b>S02 · 고정측 조립</b><span>기준면 · 로케이트링 · 스프루 · 캐비티</span></div>
+      <div><b>S03 · 가동측 조립</b><span>코어 · 이젝트 · 냉각 · 가동측 부품</span></div>
+      <div><b>S04 · 금형조립 확인</b><span>점검 · 수량·이상 · 체크리스트</span></div>
+    </div>
+    <p class="detail-note">NCS 24v4 수행준거 요약 · 원문 전문 · 06 원문 / 추출 표</p>
   </div>
-  <p class="detail-note">NCS 24v4 수행준거 요약 · 원문 전문 · 06 원문 / 추출 표</p>
 </section>
 
-<!-- ========== 03 변환 ========== -->
+<!-- ========== 03 ========== -->
 <section class="slide paper dense key-page" id="p03" data-section>
   <span class="num">03</span>
   <p class="kicker">CONVERT · CORE</p>
@@ -155,7 +140,7 @@
     <div class="head-main">
       <h2>NCS 기준을 AI 평가 기준으로 변환</h2>
       <div class="lede">
-        <p>변환 원리 · 고정측 조립 실제 대입 · 확보/미확정 구분</p>
+        <p>고정측 조립 대입 · 확보 / 현장 반영 / 이후 설계</p>
       </div>
     </div>
     <p class="head-tag">본론</p>
@@ -165,56 +150,33 @@
     <img src="./assets/glance-pipeline.jpg" alt="작업 영상 · 조립 단계 · AI 분석 · 숙련도 평가 흐름" />
   </figure>
 
-  <div class="section-rule"><span>변환 원리</span></div>
-  <div class="skeleton-flow">
-    <div><em>01</em><b>NCS</b><span>수행준거</span></div>
-    <i>→</i>
-    <div><em>02</em><b>SOP</b><span>현장 작업</span></div>
-    <i>→</i>
-    <div><em>03</em><b>관찰행동</b><span>영상</span></div>
-    <i>→</i>
-    <div><em>04</em><b>AI 지표</b><span>분석</span></div>
-    <i>→</i>
-    <div class="out"><em>05</em><b>숙련도</b><span>평가</span></div>
+  <div class="status-phases">
+    <div class="phase done">
+      <em>현재 확보</em>
+      <b>NCS 기준 → 수행준거</b>
+      <span>고정측 조립하기 · 기준면·로케이트링·스프루·캐비티</span>
+    </div>
+    <i>↓</i>
+    <div class="phase wait">
+      <em>현장 자료 반영</em>
+      <b>SOP → 영상 관찰행동</b>
+      <span>부품 확인→배치→체결→확인 · 부품 선택·공구·체결</span>
+    </div>
+    <i>↓</i>
+    <div class="phase next">
+      <em>이후 설계</em>
+      <b>AI 분석지표 → 숙련도 평가</b>
+      <span>순서·시간·누락·반복·재작업·공구 · 등급화</span>
+    </div>
   </div>
 
-  <div class="section-rule"><span>실제 변환 예시 · S02 · 고정측 조립하기</span></div>
-  <div class="map-table">
-    <div class="mt-h"><span>기준</span><span>내용</span><span>상태</span></div>
-    <div>
-      <b>NCS 요소</b>
-      <span>고정측 조립하기</span>
-      <em class="ok-tag">확보</em>
-    </div>
-    <div>
-      <b>수행준거</b>
-      <span>기준면 · 로케이트링 · 스프루 · 캐비티 조립</span>
-      <em class="ok-tag">확보</em>
-    </div>
-    <div>
-      <b>현장 SOP</b>
-      <span>부품 확인 → 배치 → 체결 → 확인 · 현장 자료 후 세분화</span>
-      <em class="wait-tag">현장자료 필요</em>
-    </div>
-    <div>
-      <b>관찰행동</b>
-      <span>부품 선택 · 배치 · 공구 사용 · 체결 · 확인</span>
-      <em class="wait-tag">SOP·영상 후 확정</em>
-    </div>
-    <div>
-      <b>AI 지표</b>
-      <span>순서 · 단계시간 · 누락 · 반복 · 재작업 · 공구</span>
-      <em class="wait-tag">관찰항목 후 설계</em>
-    </div>
-    <div>
-      <b>숙련도 평가</b>
-      <span>표준 작업 대비 수행 평가 · 등급화</span>
-      <em class="wait-tag">평가체계 설계</em>
-    </div>
+  <div class="call-line">
+    <b>변환 원칙</b>
+    영상에서 직접 확인할 수 없는 지식·판단 항목은 AI 평가 대상에서 제외하거나 별도 평가 · 작업 수행 여부 판단에 필요한 최소 행동 단위만 관찰항목으로 정의
   </div>
 </section>
 
-<!-- ========== 04 시퀀스·평가 ========== -->
+<!-- ========== 04 ========== -->
 <section class="slide paper dense key-page" id="p04" data-section>
   <span class="num">04</span>
   <p class="kicker">SEQUENCE · EVAL</p>
@@ -222,7 +184,7 @@
     <div class="head-main">
       <h2>정상 · 실제 비교 · 평가축 초안</h2>
       <div class="lede">
-        <p>시퀀스 비교 구조 · 평가체계 초안</p>
+        <p>시퀀스 비교 · 평가체계 설계 초안</p>
       </div>
     </div>
     <p class="head-tag">본론</p>
@@ -262,11 +224,11 @@
     </div>
   </div>
 
-  <div class="section-rule"><span>평가축 초안</span></div>
+  <div class="section-rule"><span>평가축 초안 · 비교 기준</span></div>
   <div class="axis-table">
-    <div class="mt-h"><span>평가축</span><span>판단 내용</span></div>
-    <div><b>순서</b><span>표준 작업순서와의 일치 여부</span></div>
-    <div><b>단계시간</b><span>단계별 표준 수행시간 대비 편차</span></div>
+    <div class="mt-h"><span>평가축</span><span>비교 기준</span></div>
+    <div><b>순서</b><span>표준 시퀀스 대비 단계 순서</span></div>
+    <div><b>단계시간</b><span>단계별 수행시간 편차</span></div>
     <div><b>반복</b><span>동일 단계·행동의 불필요한 반복</span></div>
     <div><b>재작업</b><span>이전 단계로 복귀하는 작업 발생</span></div>
     <div><b>누락</b><span>필수 단계 또는 행동 미수행</span></div>
@@ -279,7 +241,7 @@
   </p>
 </section>
 
-<!-- ========== 05 현황·자료 ========== -->
+<!-- ========== 05 ========== -->
 <section class="slide dark dense" id="p05" data-section>
   <span class="num">05</span>
   <p class="kicker">STATUS · INPUTS</p>
@@ -287,7 +249,7 @@
     <div class="head-main">
       <h2>현황 · 필요 자료 · 이후 작업</h2>
       <div class="lede">
-        <p>확보 근거 · 현장 요청 이유 · 다음 단계</p>
+        <p>확보 내용 · 자료별 산출 · 다음 단계</p>
       </div>
     </div>
   </div>
@@ -299,45 +261,22 @@
   <div class="dual-source">
     <article>
       <header><em>A</em><b>현재 확보 · NCS 기준</b></header>
-      <div class="ncs-struct light">
-        <span>능력단위</span><i>→</i>
-        <span>능력단위요소</span><i>→</i>
-        <span>수행준거</span><i>→</i>
-        <span>지식·기술·태도</span>
-      </div>
       <ul>
         <li>NCS 24v4 원문</li>
-        <li>적용 능력단위 선정</li>
-        <li>0411 4요소 · 수행준거 요약</li>
+        <li>적용 능력단위 · 0411 핵심</li>
+        <li>능력단위요소 4개 · 수행준거 요약</li>
         <li>상위 작업 흐름 S01–S04</li>
       </ul>
     </article>
     <article class="priority">
-      <header><em>B</em><b>현장 확보 필요 · 실제 작업 기준</b></header>
-      <div class="ncs-struct light">
-        <span>SOP</span><i>→</i>
-        <span>공정순서</span><i>→</i>
-        <span>공구</span><i>→</i>
-        <span>숙련 영상</span>
-      </div>
-      <div class="need-split">
-        <div>
-          <span class="need-label req">필수</span>
-          <ul>
-            <li>SOP · 실제 공정순서</li>
-            <li>단계별 공구</li>
-            <li>숙련자 영상(복수)</li>
-          </ul>
-        </div>
-        <div>
-          <span class="need-label opt">선택</span>
-          <ul>
-            <li>작업지시서 · 도면</li>
-            <li>품질·안전 기준</li>
-            <li>기존 평가표</li>
-          </ul>
-        </div>
-      </div>
+      <header><em>B</em><b>현장 자료 → 확정 산출</b></header>
+      <ul class="need-why">
+        <li><b>SOP · 공정순서</b><span>실제 작업 단계·순서 확정</span></li>
+        <li><b>단계별 공구</b><span>공구 사용 평가 기준</span></li>
+        <li><b>숙련자 영상(복수)</b><span>정상 패턴·시간 범위 도출</span></li>
+        <li><b>품질·안전 기준</b><span>오류·안전 평가항목 보완</span></li>
+        <li><b>기존 평가표</b><span>기존 판정과 AI 결과 연결</span></li>
+      </ul>
     </article>
   </div>
 
@@ -351,7 +290,7 @@
   </ol>
 </section>
 
-<!-- ========== 06 원문 ========== -->
+<!-- ========== 06 ========== -->
 <section class="slide paper dense source-pdf" id="p06" data-section>
   <span class="num">06</span>
   <p class="kicker">EVIDENCE</p>
