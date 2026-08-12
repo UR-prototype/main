@@ -2300,10 +2300,52 @@
   font-weight: 600;
 }
 
-/* restored substance · 02–06 */
-.scope-map.compact {
-  margin-bottom: 1.2vh;
-  gap: 12px;
+.role-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 0 0 1.2vh;
+}
+
+.role-strip > div {
+  padding: 10px 12px;
+  background: #f3f7fd;
+  border-top: 2px solid var(--navy);
+}
+
+.role-strip em {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--blue);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.role-strip b {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--navy);
+  font-size: 15px;
+}
+
+.role-strip span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.tier3.tight {
+  margin: 0 0 1.4vh;
+}
+
+.tier3.tight > div {
+  padding: 1vh 0.8vw;
+}
+
+.tier3.tight code {
+  font-size: 12px;
+  padding: 8px;
 }
 
 .scope-core.slim {
@@ -2562,7 +2604,8 @@
   .split-zones,
   .evidence-meta,
   .dual-source,
-  .scope-side.horizontal {
+  .scope-side.horizontal,
+  .role-strip {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -2585,7 +2628,8 @@
   .split-zones,
   .evidence-meta,
   .dual-source,
-  .scope-side.horizontal {
+  .scope-side.horizontal,
+  .role-strip {
     grid-template-columns: 1fr;
   }
 
