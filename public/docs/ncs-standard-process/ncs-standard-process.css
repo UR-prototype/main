@@ -1654,13 +1654,15 @@
 }
 
 .key-page .key-visual {
-  margin: 0 0 1.6vh;
+  margin: 0 0 1.8vh;
 }
 
 .key-page .key-visual img {
-  max-height: 20vh;
+  display: block;
+  max-height: 28vh;
   width: 100%;
   object-fit: cover;
+  object-position: center;
   border: 1px solid var(--line);
   background: #eef2f7;
 }
@@ -1668,7 +1670,7 @@
 .key-page#p05 .key-visual img {
   object-fit: contain;
   background: #f7f9fc;
-  max-height: 18vh;
+  max-height: 24vh;
 }
 
 .scope-map {
