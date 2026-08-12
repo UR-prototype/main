@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="유알커넥션 — NCS 분석 결과 기반 금형조립 AI 숙련도 평가 기준 설계" />
+  <title>유알커넥션 · 금형조립 숙련도 평가 기준</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="brief.css" />
+  <link rel="stylesheet" href="ncs-standard-process.css" />
+</head>
+<body>
+<aside class="rail" id="brief-navigation">
+  <a class="brand" href="#p01"><i>UR</i><b>유알커넥션</b></a>
+  <nav>
+    <a href="#p01" data-nav><em>01</em>개요</a>
+    <a href="#p02" data-nav><em>02</em>구성·적용</a>
+    <a href="#p03" data-nav><em>03</em>변환</a>
+    <a href="#p04" data-nav><em>04</em>시퀀스</a>
+    <a href="#p05" data-nav><em>05</em>현황·자료</a>
+    <a href="#p06" data-nav><em>06</em>원문</a>
+  </nav>
+  <footer>PROCESS BRIEF <b data-page>01 / 06</b></footer>
+</aside>
+
+<main>
+
+<!-- ========== 01 ========== -->
+<section class="slide cover dense" id="p01" data-section>
+  <div class="photo"></div><div class="shade"></div>
+  <div class="cover-copy">
+    <span class="tag">PROCESS BRIEF · 2026</span>
+    <p>유알커넥션</p>
+    <h1>금형조립 표준 작업 프로세스<br>· 숙련도 평가 기준</h1>
+    <p class="cover-note">작업 영상 기반 평가체계 · NCS · 현장 SOP · 숙련자 영상</p>
+    <div class="purpose">
+      <b>수단</b>
+      AI가 임의 기준으로 평가하지 않도록 · NCS를 평가 기준의 출발점으로 활용
+    </div>
+  </div>
+  <div class="meta">
+    <span>대상 · 단순 사출금형 조립</span>
+    <span>기준 · NCS 24v4</span>
+  </div>
+</section>
+
+<!-- ========== 02 ========== -->
+<section class="slide paper dense" id="p02" data-section>
+  <span class="num">02</span>
+  <p class="kicker">FRAMEWORK · ANALYSIS</p>
+  <div class="head row">
+    <div class="head-main">
+      <h2>평가 기준 구성 · NCS 분석</h2>
+      <div class="lede">
+        <p>어떻게 구성하는가 · NCS에서 무엇을 뽑았는가</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="p02-ncs-how">
+    <header>
+      <em>NCS</em>
+      <b>수행기준 구성 방식</b>
+    </header>
+    <ol>
+      <li>
+        <strong>능력단위</strong>
+        <span>직무에서 수행해야 할 일의 묶음</span>
+      </li>
+      <li>
+        <strong>능력단위요소</strong>
+        <span>능력단위를 작업 단위로 분해</span>
+      </li>
+      <li>
+        <strong>수행준거</strong>
+        <span>요소별 달성·판정 가능한 수행 기준</span>
+      </li>
+    </ol>
+    <p>예 · 단순 사출금형 조립 → 고정측 조립하기 → 기준면·로케이트링·스프루·캐비티</p>
+  </div>
+
+  <div class="p02-split">
+    <div class="p02-compose">
+      <h3>구성</h3>
+      <ol class="compose-rows">
+        <li>
+          <em>NCS</em>
+          <div>
+            <b>수행기준</b>
+            <code>고정측 조립하기</code>
+          </div>
+        </li>
+        <li>
+          <em>SOP</em>
+          <div>
+            <b>현장 방식</b>
+            <code>부품 확인 → 배치 → 체결 → 확인</code>
+          </div>
+        </li>
+        <li>
+          <em>영상</em>
+          <div>
+            <b>정상 패턴</b>
+            <code>부품 선택 · 공구 사용 · 체결</code>
+          </div>
+        </li>
+        <li>
+          <em>AI</em>
+          <div>
+            <b>측정</b>
+            <code>순서 · 시간 · 누락 · 반복</code>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="p02-findings">
+      <h3>분석 결과</h3>
+      <p class="findings-core">핵심 · 단순 사출금형 조립 <span>1510010411_24v4</span></p>
+      <div class="result-table">
+        <div class="mt-h"><span>단계</span><span>수행 내용</span></div>
+        <div><b>S01 준비</b><span>사양서 · 부품 · 공구 · 보호구</span></div>
+        <div><b>S02 고정측</b><span>기준면 · 로케이트링 · 스프루 · 캐비티</span></div>
+        <div><b>S03 가동측</b><span>코어 · 이젝트 · 냉각 · 가동측 부품</span></div>
+        <div><b>S04 확인</b><span>점검 · 수량·이상 · 체크리스트</span></div>
+      </div>
+      <ul class="findings-side">
+        <li><b>병행</b> 다듬질 · 조립부품검토</li>
+        <li><b>공통</b> 안전규정 준수</li>
+        <li><b>보조</b> 도면해독</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 03 ========== -->
+<section class="slide paper dense key-page" id="p03" data-section>
+  <span class="num">03</span>
+  <p class="kicker">CONVERT · CORE</p>
+  <div class="head row">
+    <div class="head-main">
+      <h2>NCS 기준을 AI 평가 기준으로 변환</h2>
+      <div class="lede">
+        <p>고정측 조립 대입 · 확보 / 현장 반영 / 이후 설계</p>
+      </div>
+    </div>
+    <p class="head-tag">본론</p>
+  </div>
+
+  <figure class="glance-hero slim key-visual">
+    <img src="./assets/glance-pipeline.jpg" alt="작업 영상 · 조립 단계 · AI 분석 · 숙련도 평가 흐름" />
+  </figure>
+
+  <div class="status-phases">
+    <div class="phase done">
+      <em>현재 확보</em>
+      <b>NCS 기준 → 수행준거</b>
+      <span>고정측 조립하기 · 기준면·로케이트링·스프루·캐비티</span>
+    </div>
+    <i>↓</i>
+    <div class="phase wait">
+      <em>현장 자료 반영</em>
+      <b>SOP → 영상 관찰행동</b>
+      <span>부품 확인→배치→체결→확인 · 부품 선택·공구·체결</span>
+    </div>
+    <i>↓</i>
+    <div class="phase next">
+      <em>이후 설계</em>
+      <b>AI 분석지표 → 숙련도 평가</b>
+      <span>순서·시간·누락·반복·재작업·공구 · 등급화</span>
+    </div>
+  </div>
+
+  <div class="call-line">
+    <b>변환 원칙</b>
+    영상에서 직접 확인할 수 없는 지식·판단 항목은 AI 평가 대상에서 제외하거나 별도 평가 · 작업 수행 여부 판단에 필요한 최소 행동 단위만 관찰항목으로 정의
+  </div>
+</section>
+
+<!-- ========== 04 ========== -->
+<section class="slide paper dense key-page" id="p04" data-section>
+  <span class="num">04</span>
+  <p class="kicker">SEQUENCE · EVAL</p>
+  <div class="head row">
+    <div class="head-main">
+      <h2>정상 · 실제 비교 · 평가축 초안</h2>
+      <div class="lede">
+        <p>시퀀스 비교 · 평가체계 설계 초안</p>
+      </div>
+    </div>
+    <p class="head-tag">본론</p>
+  </div>
+
+  <div class="seq-compare-v2">
+    <div class="seq-block normal">
+      <header>
+        <span class="zone-label">정상</span>
+        <b>표준 작업 흐름</b>
+      </header>
+      <ol>
+        <li><em>S01</em>조립 부품 준비</li>
+        <li><em>S02</em>고정측 조립</li>
+        <li><em>S03</em>가동측 조립</li>
+        <li><em>S04</em>금형조립 확인</li>
+      </ol>
+      <p>순서 일치 · 필수 단계 누락 없음</p>
+    </div>
+    <figure class="seq-mid-visual">
+      <img src="./assets/glance-stages.jpg" alt="S01 준비 · S02 고정측 · S03 가동측 · S04 확인" />
+    </figure>
+    <div class="seq-block deviant">
+      <header>
+        <span class="zone-label">관측 예</span>
+        <b>편차 표현 방식</b>
+      </header>
+      <ol>
+        <li><em>S01</em>조립 부품 준비</li>
+        <li><em>S02</em>고정측 조립</li>
+        <li><em>S03</em>가동측 조립</li>
+        <li class="repeat"><em>S02</em>고정측 조립 <strong>반복</strong></li>
+        <li><em>S04</em>금형조립 확인</li>
+      </ol>
+      <p>예시 · 수치 · SOP·영상 반영 후 산출</p>
+    </div>
+  </div>
+
+  <div class="section-rule"><span>평가축 초안 · 비교 기준</span></div>
+  <div class="axis-table">
+    <div class="mt-h"><span>평가축</span><span>비교 기준</span></div>
+    <div><b>순서</b><span>표준 시퀀스 대비 단계 순서</span></div>
+    <div><b>단계시간</b><span>단계별 수행시간 편차</span></div>
+    <div><b>반복</b><span>동일 단계·행동의 불필요한 반복</span></div>
+    <div><b>재작업</b><span>이전 단계로 복귀하는 작업 발생</span></div>
+    <div><b>누락</b><span>필수 단계 또는 행동 미수행</span></div>
+    <div><b>공구</b><span>단계별 적정 공구 사용 여부</span></div>
+    <div><b>안전</b><span>보호구 · 공구 취급 · 작업환경 · 정리정돈 · 전 과정 공통</span></div>
+  </div>
+  <p class="call-line draft-note">
+    <b>상태</b>
+    평가축 초안 · 세부 판정기준 및 가중치 · SOP·숙련자 영상·전문가 검토 후 확정
+  </p>
+</section>
+
+<!-- ========== 05 ========== -->
+<section class="slide dark dense" id="p05" data-section>
+  <span class="num">05</span>
+  <p class="kicker">STATUS · INPUTS</p>
+  <div class="head row">
+    <div class="head-main">
+      <h2>현황 · 필요 자료 · 이후 작업</h2>
+      <div class="lede">
+        <p>확보 내용 · 자료별 산출 · 다음 단계</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="why-request">
+    <p>NCS에서 평가 범위를 정의하고 · 현장 SOP에서 실제 작업순서를 확정하며 · 숙련자 영상에서 정상 수행 패턴을 추출</p>
+  </div>
+
+  <div class="dual-source">
+    <article>
+      <header><em>A</em><b>현재 확보 · NCS 기준</b></header>
+      <ul>
+        <li>NCS 24v4 원문</li>
+        <li>적용 능력단위 · 0411 핵심</li>
+        <li>능력단위요소 4개 · 수행준거 요약</li>
+        <li>상위 작업 흐름 S01–S04</li>
+      </ul>
+    </article>
+    <article class="priority">
+      <header><em>B</em><b>현장 자료 → 확정 산출</b></header>
+      <ul class="need-why">
+        <li><b>SOP · 공정순서</b><span>실제 작업 단계·순서 확정</span></li>
+        <li><b>단계별 공구</b><span>공구 사용 평가 기준</span></li>
+        <li><b>숙련자 영상(복수)</b><span>정상 패턴·시간 범위 도출</span></li>
+        <li><b>품질·안전 기준</b><span>오류·안전 평가항목 보완</span></li>
+        <li><b>기존 평가표</b><span>기존 판정과 AI 결과 연결</span></li>
+      </ul>
+    </article>
+  </div>
+
+  <div class="section-rule light"><span>이후 작업</span></div>
+  <ol class="next-steps inline">
+    <li>SOP 매핑</li>
+    <li>관찰항목 정의</li>
+    <li>정상 시퀀스 확정</li>
+    <li>AI 분석지표 정의</li>
+    <li>숙련도 평가체계</li>
+  </ol>
+</section>
+
+<!-- ========== 06 ========== -->
+<section class="slide paper dense source-pdf" id="p06" data-section>
+  <span class="num">06</span>
+  <p class="kicker">EVIDENCE</p>
+  <div class="head row">
+    <div class="head-main">
+      <h2>원문 · 근거</h2>
+      <div class="lede">
+        <p>NCS 능력단위기술서 · 추출 표 · 버전</p>
+      </div>
+    </div>
+    <p class="head-tag">Reference</p>
+  </div>
+
+  <div class="evidence-meta">
+    <div><em>문서</em><b>사출금형조립 능력단위기술서</b></div>
+    <div><em>버전</em><b>24v4</b></div>
+    <div><em>핵심 코드</em><b class="code-quiet">1510010411</b></div>
+    <div><em>분량</em><b>66p</b></div>
+  </div>
+
+  <div class="pdf-actions">
+    <a class="pdf-btn primary" href="./sources/NCS_사출금형조립_능력단위기술서.pdf" target="_blank" rel="noopener">PDF 열기</a>
+    <a class="pdf-btn" href="./sources/NCS_사출금형조립_능력단위기술서.pdf" download>다운로드</a>
+    <a class="pdf-btn" href="./ncs-source-extraction.md">추출 표</a>
+  </div>
+
+  <div class="pdf-thumbs">
+    <a href="./sources/NCS_사출금형조립_능력단위기술서.pdf" target="_blank" rel="noopener">
+      <img src="./assets/ncs-pdf-p01.png" alt="NCS PDF 1페이지" /><span>p.01</span>
+    </a>
+    <a href="./sources/NCS_사출금형조립_능력단위기술서.pdf" target="_blank" rel="noopener">
+      <img src="./assets/ncs-pdf-p02.png" alt="NCS PDF 2페이지" /><span>p.02</span>
+    </a>
+    <a href="./sources/NCS_사출금형조립_능력단위기술서.pdf" target="_blank" rel="noopener">
+      <img src="./assets/ncs-pdf-p03.png" alt="NCS PDF 3페이지" /><span>p.03</span>
+    </a>
+    <a href="./sources/NCS_사출금형조립_능력단위기술서.pdf" target="_blank" rel="noopener">
+      <img src="./assets/ncs-pdf-p04.png" alt="NCS PDF 4페이지" /><span>p.04</span>
+    </a>
+  </div>
+
+  <div class="pdf-frame-wrap">
+    <iframe
+      class="pdf-frame"
+      title="NCS 사출금형조립 능력단위기술서"
+      src="./sources/NCS_사출금형조립_능력단위기술서.pdf#toolbar=1&navpanes=0"
+    ></iframe>
+  </div>
+</section>
+
+</main>
+<script src="presentation.js"></script>
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script src="brief-ui.js"></script>
+</body>
+</html>
