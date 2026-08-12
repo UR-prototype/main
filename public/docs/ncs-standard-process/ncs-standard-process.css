@@ -2348,6 +2348,11 @@
   padding: 8px;
 }
 
+.scope-map.compact {
+  margin-bottom: 1.2vh;
+  gap: 12px;
+}
+
 .scope-core.slim {
   padding: 1.4vh 1.4vw;
 }
