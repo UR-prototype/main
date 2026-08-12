@@ -2300,6 +2300,137 @@
   font-weight: 600;
 }
 
+/* ===== page 02 · clean split ===== */
+.p02-split {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 28px;
+  margin-top: 0.6vh;
+  align-items: start;
+}
+
+.p02-compose,
+.p02-findings {
+  min-width: 0;
+}
+
+.p02-compose h3,
+.p02-findings h3 {
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.compose-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+
+.compose-rows li {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.compose-rows li:first-child {
+  padding-top: 0;
+}
+
+.compose-rows li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.compose-rows em {
+  color: var(--blue);
+  font-family: Manrope, "Noto Sans KR", monospace;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding-top: 3px;
+}
+
+.compose-rows b {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--navy);
+  font-size: 15px;
+  letter-spacing: -0.02em;
+}
+
+.compose-rows code {
+  display: block;
+  padding: 0;
+  background: none;
+  color: var(--muted);
+  font-family: Manrope, "Noto Sans KR", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.findings-core {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.findings-core span {
+  display: block;
+  margin-top: 4px;
+  color: #ffffff66;
+  font-family: Manrope, "Noto Sans KR", monospace;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.p02-findings .result-table {
+  margin-bottom: 12px;
+}
+
+.findings-side {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.findings-side li {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.findings-side b {
+  margin-right: 8px;
+  color: var(--navy);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 900px) {
+  .p02-split {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
 .role-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -2338,7 +2469,7 @@
   line-height: 1.35;
 }
 
-/* page 02 bands · differentiate parallel vs sequential vs result */
+/* page 02 bands · kept for legacy, unused */
 .band {
   margin: 0 0 1.4vh;
   padding: 1.2vh 1.2vw 1.4vh;
@@ -2436,7 +2567,7 @@
 
 .result-table > div {
   display: grid;
-  grid-template-columns: 0.9fr 1.4fr;
+  grid-template-columns: 0.7fr 1.3fr;
   gap: 12px;
   align-items: center;
   padding: 9px 12px;

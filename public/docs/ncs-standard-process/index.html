@@ -54,81 +54,62 @@
     <div class="head-main">
       <h2>평가 기준 구성 · NCS 분석</h2>
       <div class="lede">
-        <p>구성 원리 → 대입 예시 → 적용·분석 결과</p>
+        <p>어떻게 구성하는가 · NCS에서 무엇을 뽑았는가</p>
       </div>
     </div>
   </div>
 
-  <!-- A: parallel roles (not a timeline) -->
-  <div class="band band-roles">
-    <header class="band-h">
-      <em>A</em>
-      <b>구성 요소</b>
-      <span>병행 역할 · 순서가 아님</span>
-    </header>
-    <div class="role-strip">
-      <div><em>NCS</em><b>수행기준</b><span>무엇을 수행해야 하는가</span></div>
-      <div><em>SOP</em><b>현장 방식</b><span>실제로 어떤 순서로 수행하는가</span></div>
-      <div><em>영상</em><b>정상 패턴</b><span>정상 수행은 어떻게 나타나는가</span></div>
-      <div><em>AI</em><b>측정</b><span>어떤 차이를 측정하는가</span></div>
+  <div class="p02-split">
+    <div class="p02-compose">
+      <h3>구성</h3>
+      <ol class="compose-rows">
+        <li>
+          <em>NCS</em>
+          <div>
+            <b>수행기준</b>
+            <code>고정측 조립하기</code>
+          </div>
+        </li>
+        <li>
+          <em>SOP</em>
+          <div>
+            <b>현장 방식</b>
+            <code>부품 확인 → 배치 → 체결 → 확인</code>
+          </div>
+        </li>
+        <li>
+          <em>영상</em>
+          <div>
+            <b>정상 패턴</b>
+            <code>부품 선택 · 공구 사용 · 체결</code>
+          </div>
+        </li>
+        <li>
+          <em>AI</em>
+          <div>
+            <b>측정</b>
+            <code>순서 · 시간 · 누락 · 반복</code>
+          </div>
+        </li>
+      </ol>
     </div>
-  </div>
 
-  <!-- B: sequential example only -->
-  <div class="band band-example">
-    <header class="band-h">
-      <em>B</em>
-      <b>대입 예시</b>
-      <span>세로 변환 · 고정측 조립</span>
-    </header>
-    <div class="tier3 tight">
-      <div>
-        <em>NCS</em>
-        <b>상위 기준</b>
-        <code>고정측 조립하기</code>
+    <div class="p02-findings">
+      <h3>분석 결과</h3>
+      <p class="findings-core">핵심 · 단순 사출금형 조립 <span>1510010411_24v4</span></p>
+      <div class="result-table">
+        <div class="mt-h"><span>단계</span><span>수행 내용</span></div>
+        <div><b>S01 준비</b><span>사양서 · 부품 · 공구 · 보호구</span></div>
+        <div><b>S02 고정측</b><span>기준면 · 로케이트링 · 스프루 · 캐비티</span></div>
+        <div><b>S03 가동측</b><span>코어 · 이젝트 · 냉각 · 가동측 부품</span></div>
+        <div><b>S04 확인</b><span>점검 · 수량·이상 · 체크리스트</span></div>
       </div>
-      <i>↓</i>
-      <div>
-        <em>SOP</em>
-        <b>핵심 단계</b>
-        <code>부품 확인 → 배치 → 체결 → 확인</code>
-      </div>
-      <i>↓</i>
-      <div>
-        <em>영상</em>
-        <b>관찰 행동</b>
-        <code>부품 선택 · 공구 사용 · 체결</code>
-      </div>
-      <i>↓</i>
-      <div>
-        <em>AI</em>
-        <b>평가항목</b>
-        <code>순서 · 시간 · 누락 · 반복</code>
-      </div>
+      <ul class="findings-side">
+        <li><b>병행</b> 다듬질 · 조립부품검토</li>
+        <li><b>공통</b> 안전규정 준수</li>
+        <li><b>보조</b> 도면해독</li>
+      </ul>
     </div>
-  </div>
-
-  <!-- C: analysis result (table, not another timeline) -->
-  <div class="band band-analysis">
-    <header class="band-h">
-      <em>C</em>
-      <b>적용 · 분석 결과</b>
-      <span>NCS에서 뽑은 것</span>
-    </header>
-    <div class="scope-chips">
-      <span class="core">핵심 · 단순 사출금형 조립 <i>0411</i></span>
-      <span>병행 · 다듬질 <i>0403</i> · 부품검토 <i>0402</i></span>
-      <span>공통 · 안전 <i>0410</i></span>
-      <span>보조 · 도면해독 <i>0401</i></span>
-    </div>
-    <div class="result-table">
-      <div class="mt-h"><span>단계</span><span>NCS에서 확인한 주요 수행 내용</span></div>
-      <div><b>S01 · 조립 부품 준비</b><span>사양서 · 부품 · 공구 · 보호구</span></div>
-      <div><b>S02 · 고정측 조립</b><span>기준면 · 로케이트링 · 스프루 · 캐비티</span></div>
-      <div><b>S03 · 가동측 조립</b><span>코어 · 이젝트 · 냉각 · 가동측 부품</span></div>
-      <div><b>S04 · 금형조립 확인</b><span>점검 · 수량·이상 · 체크리스트</span></div>
-    </div>
-    <p class="detail-note">NCS 24v4 수행준거 요약 · 원문 전문 · 06 원문 / 추출 표</p>
   </div>
 </section>
 
