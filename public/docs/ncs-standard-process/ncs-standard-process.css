@@ -1899,13 +1899,31 @@
 
 .seq-compare-v2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 1.6vh;
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 0.85fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+  margin-bottom: 1.2vh;
+}
+
+.seq-mid-visual {
+  margin: 0;
+  min-height: 0;
+}
+
+.seq-mid-visual img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 22vh;
+  max-height: 34vh;
+  object-fit: cover;
+  object-position: center;
+  border: 1px solid var(--line);
+  background: #eef2f7;
 }
 
 .seq-block {
-  padding: 1.8vh 1.4vw;
+  padding: 1.4vh 1.1vw;
 }
 
 .seq-block.normal {
@@ -1942,10 +1960,10 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 10px;
-  padding: 9px 0;
+  gap: 8px;
+  padding: 7px 0;
   border-top: 1px solid #00000010;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -2792,6 +2810,23 @@
   grid-template-columns: 0.55fr 1.45fr;
 }
 
+#p04 .axis-table {
+  margin: 0.2vh 0 0.6vh;
+}
+
+#p04 .axis-table > div {
+  padding: 7px 10px;
+}
+
+#p04 .axis-table b,
+#p04 .axis-table span {
+  font-size: 12px;
+}
+
+#p04 .call-line.draft-note {
+  margin-top: 0.4vh;
+}
+
 .map-table .mt-h,
 .axis-table .mt-h {
   background: #f3f7fd;
@@ -2946,7 +2981,6 @@
 
 @media (max-width: 1100px) {
   .scope-map,
-  .seq-compare-v2,
   .status-triad,
   .crit-row,
   .split-zones,
@@ -2955,6 +2989,16 @@
   .scope-side.horizontal,
   .role-strip {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .seq-compare-v2 {
+    grid-template-columns: minmax(0, 1fr) minmax(120px, 0.7fr) minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .seq-mid-visual img {
+    min-height: 18vh;
+    max-height: 28vh;
   }
 
   .status-triad { grid-template-columns: 1fr; }
@@ -2981,6 +3025,11 @@
   .scope-side.horizontal,
   .role-strip {
     grid-template-columns: 1fr;
+  }
+
+  .seq-mid-visual img {
+    min-height: 16vh;
+    max-height: 22vh;
   }
 
   .lead-sentence { font-size: 22px; }
